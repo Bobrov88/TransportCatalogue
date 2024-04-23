@@ -120,20 +120,10 @@ void InputReader::ParseLine(std::string_view line)
 
 void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue &catalogue) const
 {
-    std::stable_sort(std::execution::par, commands_.begin(),
-                     commands_.end(),
-                     [](const CommandDescription &lhs,
-                        const CommandDescription &rhs)
-                     { return lhs.command > rhs.command; });
     for (const auto &command : commands_)
-    {
         if (command.command == "STOP")
-        {
             catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description)));
-        }
-        else if (command.command == "BUS")
-        {
+    for (const auto &command : commands_)
+        if (command.command == "BUS")
             catalogue.add_bus(std::move(command.id), ParseRoute(command.description));
-        }
-    }
 }

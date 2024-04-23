@@ -6,6 +6,8 @@
 #include <set>
 #include <algorithm>
 #include <unordered_set>
+#include <vector>
+#include <string_view>
 #include "geo.h"
 
 class TransportCatalogue
@@ -35,7 +37,7 @@ private:
 
     struct Bus_Hash
     {
-        size_t operator()(const Bus &bus)
+        size_t operator()(const Bus &bus) const
         {
             return static_cast<size_t>(std::stoi(bus.name));
         }
@@ -43,9 +45,9 @@ private:
 
     struct Stop_Hash
     {
-        size_t operator()(const Stop &stop)
+        size_t operator()(const Stop &stop) const
         {
-            return static_cast<size_t>(stop.coordinates.lat * stop.coordinates.lng * 1000000);
+            return static_cast<size_t>(stop.coordinates.lat * stop.coordinates.lng * 100000);
         }
     };
 
