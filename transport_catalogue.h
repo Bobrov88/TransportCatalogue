@@ -14,25 +14,34 @@ class TransportCatalogue
 {
     struct Bus;
     struct Stop;
-    
-    public:
-    void add_bus(std::string_view name, std::vector<std::string_view>& stops);
-    void add_stop(std::string_view name, Coordinates&& coordinates);
-    const Bus* get_bus(std::string_view bus) const;
-    const Stop* get_stop(std::string_view stop) const;
+
+public:
+    void add_bus(std::string_view name, std::vector<std::string_view> &stops);
+    void add_stop(std::string_view name, Coordinates &&coordinates);
+    const Bus *get_bus(std::string_view bus) const;
+    const Stop *get_stop(std::string_view stop) const;
 
 private:
-
     struct Stop
     {
         std::string name;
         Coordinates coordinates;
+
+        bool operator==(const Stop &stop) const
+        {
+            return name == stop.name && coordinates == stop.coordinates;
+        }
     };
 
     struct Bus
     {
         std::string name;
         std::deque<const Stop *> stops;
+
+        bool operator==(const Bus &bus) const
+        {
+            return name == bus.name;
+        }
     };
 
     struct Bus_Hash
@@ -47,7 +56,7 @@ private:
     {
         size_t operator()(const Stop &stop) const
         {
-            return static_cast<size_t>(stop.coordinates.lat * stop.coordinates.lng * 100000);
+            return static_cast<size_t>(static_cast<int>((stop.coordinates.lat * stop.coordinates.lng * 100000.0)));
         }
     };
 
