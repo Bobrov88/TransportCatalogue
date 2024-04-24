@@ -19,20 +19,26 @@ void TransportCatalogue::add_stop(std::string_view name, Coordinates &&coordinat
 
 const TransportCatalogue::Bus *TransportCatalogue::get_bus(std::string_view bus) const
 {
-    return &(*std::find_if(buses_.cbegin(), buses_.cend(),
-                           [&bus](const auto &lhs)
-                           {
-                               return lhs.name == bus;
-                           }));
+    auto found = std::find_if(buses_.cbegin(), buses_.cend(),
+                              [&bus](const auto &lhs)
+                              {
+                                  return lhs.name == bus;
+                              });
+    if (found != buses_.cend())
+        return &(*found);
+    return nullptr;
 }
 
 const TransportCatalogue::Stop *TransportCatalogue::get_stop(std::string_view stop) const
 {
-    return &(*std::find_if(stops_.cbegin(), stops_.cend(),
-                           [&stop](const auto &lhs)
-                           {
-                               return lhs.name == stop;
-                           }));
+    auto found = std::find_if(stops_.cbegin(), stops_.cend(),
+                              [&stop](const auto &lhs)
+                              {
+                                  return lhs.name == stop;
+                              });
+    if (found != stops_.cend())
+        return &(*found);
+    return nullptr;
 }
 
 size_t TransportCatalogue::get_stop_count(std::string_view bus) const

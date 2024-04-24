@@ -121,9 +121,9 @@ void InputReader::ParseLine(std::string_view line)
 void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue &catalogue) const
 {
     for (const auto &command : commands_)
-        if (command.command == "STOP")
+        if (command.command == "Stop")
             catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description)));
     for (const auto &command : commands_)
-        if (command.command == "BUS")
+        if (command.command == "Bus")
             catalogue.add_bus(std::move(command.id), ParseRoute(command.description));
 }

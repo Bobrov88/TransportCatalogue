@@ -51,7 +51,7 @@ private:
     {
         size_t operator()(const Bus &bus) const
         {
-            return static_cast<size_t>(std::stoi(bus.name));
+            return std::hash<std::string>{}(bus.name);
         }
     };
 
