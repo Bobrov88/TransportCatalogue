@@ -51,6 +51,7 @@ size_t TransportCatalogue::get_unique_stop_count(std::string_view bus) const
     std::set<const Stop *> unique_stop{stops.cbegin(), stops.cend()};
     return unique_stop.size();
 }
+
 double TransportCatalogue::get_route_length(std::string_view bus) const
 {
     auto &stops = get_bus(bus)->stops;
@@ -61,3 +62,7 @@ double TransportCatalogue::get_route_length(std::string_view bus) const
     }
     return route_length;
 }
+
+    const std::unordered_set<TransportCatalogue::Bus, TransportCatalogue::Bus_Hash>& TransportCatalogue::get_buses() const {
+        return buses_;
+    }

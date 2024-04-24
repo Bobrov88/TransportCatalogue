@@ -14,12 +14,14 @@ class TransportCatalogue
 {
     struct Bus;
     struct Stop;
+    struct Bus_Hash;
 
 public:
     void add_bus(std::string_view name, std::vector<std::string_view> stops);
     void add_stop(std::string_view name, Coordinates &&coordinates);
     const Bus *get_bus(std::string_view bus) const;
     const Stop *get_stop(std::string_view stop) const;
+    const std::unordered_set<Bus, Bus_Hash>& get_buses() const;
     size_t get_stop_count(std::string_view bus) const;
     size_t get_unique_stop_count(std::string_view bus) const;
     double get_route_length(std::string_view bus) const;
