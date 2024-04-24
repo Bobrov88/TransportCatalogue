@@ -1,6 +1,6 @@
 #include "transport_catalogue.h"
 
-void TransportCatalogue::add_bus(std::string_view name, std::vector<std::string_view> &stops)
+void TransportCatalogue::add_bus(std::string_view name, std::vector<std::string_view> stops)
 {
     Bus bus;
     bus.name = name;

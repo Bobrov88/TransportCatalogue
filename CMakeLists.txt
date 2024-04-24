@@ -19,4 +19,4 @@ set(HEADERS
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
+target_compile_options(${PROJECT_NAME} PRIVATE /Wall /W4)

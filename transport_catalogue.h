@@ -16,7 +16,7 @@ class TransportCatalogue
     struct Stop;
 
 public:
-    void add_bus(std::string_view name, std::vector<std::string_view> &stops);
+    void add_bus(std::string_view name, std::vector<std::string_view> stops);
     void add_stop(std::string_view name, Coordinates &&coordinates);
     const Bus *get_bus(std::string_view bus) const;
     const Stop *get_stop(std::string_view stop) const;
