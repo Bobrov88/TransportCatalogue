@@ -20,6 +20,9 @@ public:
     void add_stop(std::string_view name, Coordinates &&coordinates);
     const Bus *get_bus(std::string_view bus) const;
     const Stop *get_stop(std::string_view stop) const;
+    size_t get_stop_count(std::string_view bus) const;
+    size_t get_unique_stop_count(std::string_view bus) const;
+    double get_route_length(std::string_view bus) const;
 
 private:
     struct Stop

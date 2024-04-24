@@ -2,7 +2,8 @@
 
 #include <iosfwd>
 #include <string_view>
-
+#include <vector>
+#include <iomanip>
 #include "transport_catalogue.h"
 
 void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,

@@ -34,3 +34,24 @@ const TransportCatalogue::Stop *TransportCatalogue::get_stop(std::string_view st
                                return lhs.name == stop;
                            }));
 }
+
+size_t TransportCatalogue::get_stop_count(std::string_view bus) const
+{
+    return get_bus(bus)->stops.size();
+}
+size_t TransportCatalogue::get_unique_stop_count(std::string_view bus) const
+{
+    auto &stops = get_bus(bus)->stops;
+    std::set<const Stop *> unique_stop{stops.cbegin(), stops.cend()};
+    return unique_stop.size();
+}
+double TransportCatalogue::get_route_length(std::string_view bus) const
+{
+    auto &stops = get_bus(bus)->stops;
+    double route_length = 0.0;
+    for (size_t i = 0; i < stops.size() - 1; ++i)
+    {
+        route_length += ComputeDistance(stops[i]->coordinates, stops[i + 1]->coordinates);
+    }
+    return route_length;
+}
