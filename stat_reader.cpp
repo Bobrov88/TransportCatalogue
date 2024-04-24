@@ -1,13 +1,28 @@
 #include "stat_reader.h"
 #include <iomanip>
 
+using namespace std::string_view_literals;
+
+
+Request ParseRequest(const std::string_view request)
+{
+    Request result;
+    auto not_space = request.find_first_not_of(' ');
+    if (not_space != std::string_view::npos)
+        return {};
+    auto pos = request.find(' ');
+    result.request = request.substr(not_space, pos - not_space);
+    pos = request.find_first_not_of(' ');
+    auto last_pos = request.find_last_not_of(' ');
+    result.what = request.substr(pos, last_pos - pos);
+    return result;
+}
+
 void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::string_view request,
                        std::ostream &output)
 {
-    using namespace std::string_view_literals;
-    auto parsed_request = request.substr(4, request.size() - 3);
-    output << "Bus "sv;
-    output << parsed_request << ": "sv;
+    auto parsed = ParseRequest(request);
+    output << parsed.request << ": "sv;
     if (transport_catalogue.get_bus(parsed_request) == nullptr)
     {
         output << "not found\n"sv;
