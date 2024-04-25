@@ -66,6 +66,7 @@ void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::strin
             {
                 output << " "sv << bus;
             }
+            output << "\n";
         }
     }
 }
