@@ -8,13 +8,13 @@ Request ParseRequest(const std::string_view request)
 {
     Request result;
     auto not_space = request.find_first_not_of(' ');
-    if (not_space != std::string_view::npos)
+    if (not_space == std::string_view::npos)
         return {};
-    auto pos = request.find(' ');
+    auto pos = request.find(' ', not_space);
     result.request = request.substr(not_space, pos - not_space);
-    pos = request.find_first_not_of(' ');
+    pos = request.find_first_not_of(' ', pos);
     auto last_pos = request.find_last_not_of(' ');
-    result.what = request.substr(pos, last_pos - pos);
+    result.what = request.substr(pos, last_pos - pos + 1);
     return result;
 }
 
@@ -51,13 +51,21 @@ void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::strin
         else
         {
             std::set<std::string_view> bus_list;
-            for (const auto& bus : transport_catalogue.get_buses()) {
+            for (const auto &bus : transport_catalogue.get_buses())
+            {
                 if (std::find(bus.stops.cbegin(), bus.stops.cend(), stop) != bus.stops.cend())
-                bus_list.insert(stop->name);
+                    bus_list.insert(bus.name);
             }
-            if (bus_list.empty()) {
-                output <<"not buses\n";
+            if (bus_list.empty())
+            {
+                output << "no buses\n";
+                return;
             }
-            
+            output << "buses"sv;
+            for (const auto &bus : bus_list)
+            {
+                output << " "sv << bus;
+            }
         }
     }
+}
