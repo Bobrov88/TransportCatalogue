@@ -5,9 +5,9 @@
 
 using namespace std::string_view_literals;
 
-Request ParseRequest(const std::string_view request)
+Request::Req Request::ParseRequest(const std::string_view request)
 {
-    Request result;
+    Req result;
     auto not_space = request.find_first_not_of(' ');
     if (not_space == std::string_view::npos)
         return {};
@@ -19,10 +19,10 @@ Request ParseRequest(const std::string_view request)
     return result;
 }
 
-void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::string_view request,
+void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalogue, std::string_view request,
                        std::ostream &output)
 {
-    auto parsed = ParseRequest(request);
+    auto parsed = Request::ParseRequest(request);
     output << parsed.request << " "sv << parsed.what << ": "sv;
     if (parsed.request == "Bus"sv)
     {
@@ -71,12 +71,14 @@ void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::strin
     }
 }
 
-void put_route_to_output(double value, std::ostream &output) {
+void put_route_to_output(double value, std::ostream &output)
+{
     int precision = 1;
-    while(true) {
+    while (true)
+    {
         ++precision;
-        if (value < std::pow(10, precision)) 
-        break;
+        if (value < std::pow(10, precision))
+            break;
     }
     output << std::fixed << std::setprecision(6 - precision) << value << " route length\n"sv;
 }

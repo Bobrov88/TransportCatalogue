@@ -5,9 +5,10 @@
 #include "stat_reader.h"
 
 using namespace std;
+using namespace Input;
 
 int main() {
-    TransportCatalogue catalogue;
+    Data::TransportCatalogue catalogue;
 
     int base_request_count;
     cin >> base_request_count >> ws;
@@ -27,6 +28,6 @@ int main() {
     for (int i = 0; i < stat_request_count; ++i) {
         string line;
         getline(cin, line);
-        ParseAndPrintStat(catalogue, line, cout);
+        Request::ParseAndPrintStat(catalogue, line, cout);
     }
 }

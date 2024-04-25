@@ -6,14 +6,18 @@
 #include "transport_catalogue.h"
 #include "input_reader.h"
 
-struct Request {
-    std::string_view request;
-    std::string_view what;
-};
+namespace Request
+{
+    struct Req
+    {
+        std::string_view request;
+        std::string_view what;
+    };
 
-Request ParseRequest(const std::string_view request);
+    Req ParseRequest(const std::string_view request);
 
-void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
-                       std::ostream& output);
+    void ParseAndPrintStat(const Data::TransportCatalogue &tansport_catalogue, std::string_view request,
+                           std::ostream &output);
+}
 
 void put_route_to_output(double value, std::ostream &output);

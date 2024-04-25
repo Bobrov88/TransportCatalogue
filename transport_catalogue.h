@@ -10,61 +10,66 @@
 #include <string_view>
 #include "geo.h"
 
-class TransportCatalogue
+using Geo::Coordinates;
+
+namespace Data
 {
-    struct Bus;
-    struct Stop;
-    struct Bus_Hash;
-
-public:
-    void add_bus(std::string_view name, std::vector<std::string_view> stops);
-    void add_stop(std::string_view name, Coordinates &&coordinates);
-    const Bus *get_bus(std::string_view bus) const;
-    const Stop *get_stop(std::string_view stop) const;
-    const std::unordered_set<Bus, Bus_Hash>& get_buses() const;
-    size_t get_stop_count(std::string_view bus) const;
-    size_t get_unique_stop_count(std::string_view bus) const;
-    double get_route_length(std::string_view bus) const;
-
-private:
-    struct Stop
+    class TransportCatalogue
     {
-        std::string name;
-        Coordinates coordinates;
+        struct Bus;
+        struct Stop;
+        struct Bus_Hash;
 
-        bool operator==(const Stop &stop) const
+    public:
+        void add_bus(std::string_view name, std::vector<std::string_view> stops);
+        void add_stop(std::string_view name, Coordinates &&coordinates);
+        const Bus *get_bus(std::string_view bus) const;
+        const Stop *get_stop(std::string_view stop) const;
+        const std::unordered_set<Bus, Bus_Hash> &get_buses() const;
+        size_t get_stop_count(std::string_view bus) const;
+        size_t get_unique_stop_count(std::string_view bus) const;
+        double get_route_length(std::string_view bus) const;
+
+    private:
+        struct Stop
         {
-            return name == stop.name && coordinates == stop.coordinates;
-        }
-    };
+            std::string name;
+            Coordinates coordinates;
 
-    struct Bus
-    {
-        std::string name;
-        std::deque<const Stop *> stops;
+            bool operator==(const Stop &stop) const
+            {
+                return name == stop.name && coordinates == stop.coordinates;
+            }
+        };
 
-        bool operator==(const Bus &bus) const
+        struct Bus
         {
-            return name == bus.name;
-        }
-    };
+            std::string name;
+            std::deque<const Stop *> stops;
 
-    struct Bus_Hash
-    {
-        size_t operator()(const Bus &bus) const
+            bool operator==(const Bus &bus) const
+            {
+                return name == bus.name;
+            }
+        };
+
+        struct Bus_Hash
         {
-            return std::hash<std::string>{}(bus.name);
-        }
-    };
+            size_t operator()(const Bus &bus) const
+            {
+                return std::hash<std::string>{}(bus.name);
+            }
+        };
 
-    struct Stop_Hash
-    {
-        size_t operator()(const Stop &stop) const
+        struct Stop_Hash
         {
-            return static_cast<size_t>(static_cast<int>((stop.coordinates.lat * stop.coordinates.lng * 100000.0)));
-        }
-    };
+            size_t operator()(const Stop &stop) const
+            {
+                return static_cast<size_t>(static_cast<int>((stop.coordinates.lat * stop.coordinates.lng * 100000.0)));
+            }
+        };
 
-    std::unordered_set<Bus, Bus_Hash> buses_;
-    std::unordered_set<Stop, Stop_Hash> stops_;
-};
+        std::unordered_set<Bus, Bus_Hash> buses_;
+        std::unordered_set<Stop, Stop_Hash> stops_;
+    };
+}

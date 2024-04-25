@@ -1,5 +1,7 @@
 #include "transport_catalogue.h"
 
+using namespace Data;
+
 void TransportCatalogue::add_bus(std::string_view name, std::vector<std::string_view> stops)
 {
     Bus bus;

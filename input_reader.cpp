@@ -7,6 +7,9 @@
 /**
  * Парсит строку вида "10.123,  -30.1837" и возвращает пару координат (широта, долгота)
  */
+using Geo::Coordinates;
+using namespace Input;
+
 Coordinates ParseCoordinates(std::string_view str)
 {
     static const double nan = std::nan("");
@@ -118,7 +121,7 @@ void InputReader::ParseLine(std::string_view line)
     }
 }
 
-void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue &catalogue) const
+void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catalogue) const
 {
     for (const auto &command : commands_)
         if (command.command == "Stop")
