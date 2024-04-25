@@ -15,3 +15,5 @@ Request ParseRequest(const std::string_view request);
 
 void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
                        std::ostream& output);
+
+void put_route_to_output(double value, std::ostream &output);

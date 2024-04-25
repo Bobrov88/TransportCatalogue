@@ -1,6 +1,7 @@
 #include "stat_reader.h"
 #include <iomanip>
 #include <set>
+#include <math.h>
 
 using namespace std::string_view_literals;
 
@@ -36,8 +37,7 @@ void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::strin
             double route_length = transport_catalogue.get_route_length(parsed.what);
             output << stop_on_route << " stops on route, "sv;
             output << unique_stop_on_route << " unique stops, "sv;
-            output << std::fixed << route_length << " route length";
-            output << "\n"sv;
+            put_route_to_output(route_length, output);
         }
         return;
     }
@@ -68,4 +68,14 @@ void ParseAndPrintStat(const TransportCatalogue &transport_catalogue, std::strin
             }
         }
     }
+}
+
+void put_route_to_output(double value, std::ostream &output) {
+    int precision = 1;
+    while(true) {
+        ++precision;
+        if (value < std::pow(10, precision)) 
+        break;
+    }
+    output << std::fixed << std::setprecision(6 - precision) << value << " route length\n"sv;
 }
