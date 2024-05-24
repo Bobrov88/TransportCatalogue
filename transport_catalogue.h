@@ -5,7 +5,7 @@
 #include <iostream>
 #include <set>
 #include <algorithm>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 #include <string_view>
 #include "geo.h"
@@ -19,13 +19,15 @@ namespace Data
         struct Bus;
         struct Stop;
         struct Bus_Hash;
+        struct Stop_Hash;
 
     public:
         void add_bus(std::string_view name, std::vector<std::string_view> stops);
         void add_stop(std::string_view name, Coordinates &&coordinates);
         const Bus *get_bus(std::string_view bus) const;
         const Stop *get_stop(std::string_view stop) const;
-        const std::unordered_set<Bus, Bus_Hash> &get_buses() const;
+        const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &get_buses() const;
+        const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &get_stops() const;
         size_t get_stop_count(std::string_view bus) const;
         size_t get_unique_stop_count(std::string_view bus) const;
         double get_route_length(std::string_view bus) const;
@@ -45,7 +47,7 @@ namespace Data
         struct Bus
         {
             std::string name;
-            std::deque<const Stop *> stops;
+            std::deque<std::string_view> stops;
 
             bool operator==(const Bus &bus) const
             {
@@ -55,21 +57,24 @@ namespace Data
 
         struct Bus_Hash
         {
-            size_t operator()(const Bus &bus) const
+            size_t operator()(std::string_view name) const
             {
-                return std::hash<std::string>{}(bus.name);
+                return std::hash<std::string_view>{}(name);
             }
         };
 
         struct Stop_Hash
         {
-            size_t operator()(const Stop &stop) const
+            size_t operator()(std::string_view name) const
             {
-                return static_cast<size_t>(static_cast<int>((stop.coordinates.lat * stop.coordinates.lng * 100000.0)));
+                // return static_cast<size_t>(static_cast<int>((stop.coordinates.lat * stop.coordinates.lng * 100000.0)));
+                return std::hash<std::string_view>{}(name);
             }
         };
 
-        std::unordered_set<Bus, Bus_Hash> buses_;
-        std::unordered_set<Stop, Stop_Hash> stops_;
+        std::deque<Bus> b_;
+        std::deque<Stop> st_;
+        std::unordered_map<std::string_view, const Bus *, Bus_Hash> buses_;
+        std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
     };
 }

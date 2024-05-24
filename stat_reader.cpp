@@ -51,10 +51,10 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
         else
         {
             std::set<std::string_view> bus_list;
-            for (const auto &bus : transport_catalogue.get_buses())
+            for (const auto &[name, bus] : transport_catalogue.get_buses())
             {
-                if (std::find(bus.stops.cbegin(), bus.stops.cend(), stop) != bus.stops.cend())
-                    bus_list.insert(bus.name);
+                if (std::find(bus->stops.cbegin(), bus->stops.cend(), stop->name) != bus->stops.cend())
+                    bus_list.insert(name);
             }
             if (bus_list.empty())
             {
