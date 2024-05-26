@@ -24,6 +24,7 @@ namespace Data
     public:
         void add_bus(std::string_view name, std::vector<std::string_view> stops);
         void add_stop(std::string_view name, Coordinates &&coordinates);
+        void add_distances(std::vector<std::string_view> distances);
         const Bus *get_bus(std::string_view bus) const;
         const Stop *get_stop(std::string_view stop) const;
         const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &get_buses() const;
@@ -37,6 +38,7 @@ namespace Data
         {
             std::string name;
             Coordinates coordinates;
+            std::unordered_map<std::string_view, int> distances_to;
 
             bool operator==(const Stop &stop) const
             {

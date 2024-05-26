@@ -9,6 +9,7 @@
  */
 using Geo::Coordinates;
 using namespace Input;
+using namespace std::string_view_literals;
 
 Coordinates ParseCoordinates(std::string_view str)
 {
@@ -123,9 +124,18 @@ void InputReader::ParseLine(std::string_view line)
 
 void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catalogue) const
 {
-    for (const auto &command : commands_)
+    for (const auto &command : commands_) {
         if (command.command == "Stop")
-            catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description)));
+        {
+            auto comma1 = command.description.find(',');
+            auto comma2 = command.description.find(',', comma1);
+            if (comma2 == std::string::npos)
+                catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description)));
+                else {
+                catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description.substr(0, comma2))));
+                catalogue.add_distances(Split(command.description.substr(comma2+1), ','));
+        }
+    }
     for (const auto &command : commands_)
         if (command.command == "Bus")
             catalogue.add_bus(std::move(command.id), ParseRoute(command.description));
