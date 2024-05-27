@@ -122,6 +122,18 @@ void InputReader::ParseLine(std::string_view line)
     }
 }
 
+std::unordered_map<std::string_view, int> ParseDistance(std::vector<std::string_view> distances) {
+    std::unordered_map<std::string_view, int> parsed_distances;
+    for(auto& distance : distances) {
+        auto last_space = distance.find_last_of(' ');
+        auto stop_name = std::move(distance.substr(last_space+1));
+        auto m_pos = distance.find_first_of('m');
+        auto int_distance = std::stoi(std::string(distance.substr(0, m_pos)));
+        parsed_distances.emplace(std::move(stop_name), std::move(int_distance));
+    }
+    return parsed_distances;
+}
+
 void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catalogue) const
 {
     for (const auto &command : commands_) {
@@ -130,11 +142,12 @@ void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catal
             auto comma1 = command.description.find(',');
             auto comma2 = command.description.find(',', comma1);
             if (comma2 == std::string::npos)
-                catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description)));
+                catalogue.add_stop(command.id, std::move(ParseCoordinates(command.description)));
                 else {
-                catalogue.add_stop(std::move(command.id), std::move(ParseCoordinates(command.description.substr(0, comma2))));
-                catalogue.add_distances(Split(command.description.substr(comma2+1), ','));
+                catalogue.add_stop(command.id, std::move(ParseCoordinates(command.description.substr(0, comma2))));
+                catalogue.add_distances(command.id, std::move(ParseDistance(Split(command.description.substr(comma2+1), ','))));
         }
+    }
     }
     for (const auto &command : commands_)
         if (command.command == "Bus")

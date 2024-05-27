@@ -21,6 +21,11 @@ void TransportCatalogue::add_stop(std::string_view name, Coordinates &&coordinat
     stops_.insert({std::move(name), &st_.back()});
 }
 
+void TransportCatalogue::add_distances(std::string_view stop, std::unordered_map<std::string_view, int> distances) {
+    for(auto &[key, value] : distances) 
+        distances_.emplace(std::pair(get_stop(stop), get_stop(key)), value);
+}
+
 const TransportCatalogue::Bus *TransportCatalogue::get_bus(std::string_view bus) const
 {
     if (buses_.find(bus) != buses_.end())
@@ -69,4 +74,10 @@ const std::unordered_map<std::string_view, const TransportCatalogue::Bus *, Tran
 const std::unordered_map<std::string_view, const TransportCatalogue::Stop *, TransportCatalogue::Stop_Hash> &TransportCatalogue::get_stops() const
 {
     return stops_;
+}
+
+int TransportCatalogue::get_distance_between_stops(std::string_view from, std::string_view to) {
+    auto found = distances_.find({get_stop(from), get_stop(to)});
+    if (found != distances_.end()) return found->second;
+    return distances_.find({get_stop(to), get_stop(from)})->second;
 }
