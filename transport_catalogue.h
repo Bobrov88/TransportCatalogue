@@ -23,18 +23,18 @@ namespace Data
         struct Dist_Hash;
 
     public:
-        void add_bus(std::string_view name, std::vector<std::string_view> stops);
-        void add_stop(std::string_view name, Coordinates &&coordinates);
-        void add_distances(std::string_view stop, std::unordered_map<std::string_view, int> distances);
-        const Bus *get_bus(std::string_view bus) const;
-        const Stop *get_stop(std::string_view stop) const;
-        const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &get_buses() const;
-        const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &get_stops() const;
-        size_t get_stop_count(std::string_view bus) const;
-        size_t get_unique_stop_count(std::string_view bus) const;
-        double get_route_length(std::string_view bus) const;
-        double get_real_route_length(std::string_view bus) const;
-        int get_distance_between_stops(std::string_view from, std::string_view to);
+        void AddBus(std::string_view name, std::vector<std::string_view> stops);
+        void AddStop(std::string_view name, Coordinates &&coordinates);
+        void AddDistances(std::string_view stop, std::unordered_map<std::string_view, int> distances);
+        const Bus *GetBus(std::string_view bus) const;
+        const Stop *GetStop(std::string_view stop) const;
+        const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &GetBuses() const;
+        const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &GetStops() const;
+        size_t GetStopCount(std::string_view bus) const;
+        size_t GetUniqueStopCount(std::string_view bus) const;
+        double GetRouteLength(std::string_view bus) const;
+        int GetRealRouteLength(std::string_view bus) const;
+        int GetDistanceBetweenStops(std::string_view from, std::string_view to) const;
 
     private:
         struct Stop

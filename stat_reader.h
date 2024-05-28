@@ -21,3 +21,4 @@ namespace Request
 }
 
 void put_route_to_output(double value, std::ostream &output);
+void put_curvature_to_output(double value, std::ostream &output);

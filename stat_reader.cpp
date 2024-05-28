@@ -20,30 +20,33 @@ Request::Req Request::ParseRequest(const std::string_view request)
 }
 
 void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalogue, std::string_view request,
-                       std::ostream &output)
+                                std::ostream &output)
 {
     auto parsed = Request::ParseRequest(request);
     output << parsed.request << " "sv << parsed.what << ": "sv;
     if (parsed.request == "Bus"sv)
     {
-        if (transport_catalogue.get_bus(parsed.what) == nullptr)
+        if (transport_catalogue.GetBus(parsed.what) == nullptr)
         {
             output << "not found\n"sv;
         }
         else
         {
-            size_t stop_on_route = transport_catalogue.get_stop_count(parsed.what);
-            size_t unique_stop_on_route = transport_catalogue.get_unique_stop_count(parsed.what);
-            double route_length = transport_catalogue.get_route_length(parsed.what);
+            size_t stop_on_route = transport_catalogue.GetStopCount(parsed.what);
+            size_t unique_stop_on_route = transport_catalogue.GetUniqueStopCount(parsed.what);
+            int real_route_length = transport_catalogue.GetRealRouteLength(parsed.what);
+            double route_length = transport_catalogue.GetRouteLength(parsed.what);
+            double curvature = static_cast<double>(real_route_length)/route_length;
             output << stop_on_route << " stops on route, "sv;
             output << unique_stop_on_route << " unique stops, "sv;
-            put_route_to_output(route_length, output);
+            output << real_route_length << " route length, "sv;
+            put_curvature_to_output(curvature, output);
         }
         return;
     }
     if (parsed.request == "Stop"sv)
     {
-        auto stop = transport_catalogue.get_stop(parsed.what);
+        auto stop = transport_catalogue.GetStop(parsed.what);
         if (stop == nullptr)
         {
             output << "not found\n"sv;
@@ -51,7 +54,7 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
         else
         {
             std::set<std::string_view> bus_list;
-            for (const auto &[name, bus] : transport_catalogue.get_buses())
+            for (const auto &[name, bus] : transport_catalogue.GetBuses())
             {
                 if (std::find(bus->stops.cbegin(), bus->stops.cend(), stop->name) != bus->stops.cend())
                     bus_list.insert(name);
@@ -80,5 +83,10 @@ void put_route_to_output(double value, std::ostream &output)
         if (value < std::pow(10, precision))
             break;
     }
-    output << std::fixed << std::setprecision(6 - precision) << value << " route length\n"sv;
+    output << std::fixed << std::setprecision(6 - precision) << value << " route length, "sv;
+}
+
+void put_curvature_to_output(double value, std::ostream &output)
+{
+    output << std::fixed << std::setprecision(5) << value << " curvature\n"sv;
 }
