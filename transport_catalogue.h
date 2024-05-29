@@ -4,6 +4,7 @@
 #include <deque>
 #include <iostream>
 #include <set>
+#include <list>
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
@@ -83,8 +84,8 @@ namespace Data
             }
         };
 
-        std::deque<Bus> b_;
-        std::deque<Stop> st_;
+        std::list<Bus> b_;
+        std::list<Stop> st_;
         std::unordered_map<std::string_view, const Bus *, Bus_Hash> buses_;
         std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
         std::unordered_map<std::pair<const Stop*, const Stop*>, int, Dist_Hash> distances_;

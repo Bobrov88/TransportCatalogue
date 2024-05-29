@@ -32,11 +32,17 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
         }
         else
         {
+            std::cout<<"LINE 1\n";
             size_t stop_on_route = transport_catalogue.GetStopCount(parsed.what);
+            std::cout<<"LINE 2\n";
             size_t unique_stop_on_route = transport_catalogue.GetUniqueStopCount(parsed.what);
+            std::cout<<"LINE 3\n";
             int real_route_length = transport_catalogue.GetRealRouteLength(parsed.what);
+            std::cout<<"LINE 4\n";
             double route_length = transport_catalogue.GetRouteLength(parsed.what);
-            double curvature = static_cast<double>(real_route_length)/route_length;
+            std::cout<<"LINE 5\n";
+            double curvature = static_cast<double>(real_route_length) / route_length;
+            std::cout<<"LINE 6\n";
             output << stop_on_route << " stops on route, "sv;
             output << unique_stop_on_route << " unique stops, "sv;
             output << real_route_length << " route length, "sv;
