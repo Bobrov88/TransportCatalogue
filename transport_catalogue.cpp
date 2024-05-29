@@ -25,10 +25,6 @@ void TransportCatalogue::AddDistances(std::string_view stop, std::unordered_map<
 {
     for (auto &[key, value] : distances)
         distances_.emplace(std::pair(GetStop(stop), GetStop(key)), value);
-    for (auto &[key, value] : distances_)
-    {
-        std::cout << key.first->name << " " << key.second->name << " " << value << "\n";
-    }
 }
 
 const TransportCatalogue::Bus *TransportCatalogue::GetBus(std::string_view bus) const
