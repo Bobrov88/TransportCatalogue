@@ -8,11 +8,11 @@ namespace Geo
     {
         double lat;
         double lng;
-        bool operator==(const Coordinates &other) const
+        bool operator==(const Coordinates& other) const
         {
             return lat == other.lat && lng == other.lng;
         }
-        bool operator!=(const Coordinates &other) const
+        bool operator!=(const Coordinates& other) const
         {
             return !(*this == other);
         }

@@ -19,8 +19,8 @@ Request::Req Request::ParseRequest(const std::string_view request)
     return result;
 }
 
-void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalogue, std::string_view request,
-                                std::ostream &output)
+void Request::ParseAndPrintStat(const Data::TransportCatalogue& transport_catalogue, std::string_view request,
+    std::ostream& output)
 {
     auto parsed = Request::ParseRequest(request);
     output << parsed.request << " "sv << parsed.what << ": "sv;
@@ -32,17 +32,11 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
         }
         else
         {
-            std::cout<<"LINE 1\n";
             size_t stop_on_route = transport_catalogue.GetStopCount(parsed.what);
-            std::cout<<"LINE 2\n";
             size_t unique_stop_on_route = transport_catalogue.GetUniqueStopCount(parsed.what);
-            std::cout<<"LINE 3\n";
             int real_route_length = transport_catalogue.GetRealRouteLength(parsed.what);
-            std::cout<<"LINE 4\n";
             double route_length = transport_catalogue.GetRouteLength(parsed.what);
-            std::cout<<"LINE 5\n";
             double curvature = static_cast<double>(real_route_length) / route_length;
-            std::cout<<"LINE 6\n";
             output << stop_on_route << " stops on route, "sv;
             output << unique_stop_on_route << " unique stops, "sv;
             output << real_route_length << " route length, "sv;
@@ -60,7 +54,7 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
         else
         {
             std::set<std::string_view> bus_list;
-            for (const auto &[name, bus] : transport_catalogue.GetBuses())
+            for (const auto& [name, bus] : transport_catalogue.GetBuses())
             {
                 if (std::find(bus->stops.cbegin(), bus->stops.cend(), stop->name) != bus->stops.cend())
                     bus_list.insert(name);
@@ -71,7 +65,7 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
                 return;
             }
             output << "buses"sv;
-            for (const auto &bus : bus_list)
+            for (const auto& bus : bus_list)
             {
                 output << " "sv << bus;
             }
@@ -80,7 +74,7 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
     }
 }
 
-void put_route_to_output(double value, std::ostream &output)
+void put_route_to_output(double value, std::ostream& output)
 {
     int precision = 1;
     while (true)
@@ -92,7 +86,7 @@ void put_route_to_output(double value, std::ostream &output)
     output << std::fixed << std::setprecision(6 - precision) << value << " route length, "sv;
 }
 
-void put_curvature_to_output(double value, std::ostream &output)
+void put_curvature_to_output(double value, std::ostream& output)
 {
     output << std::fixed << std::setprecision(5) << value << " curvature\n"sv;
 }

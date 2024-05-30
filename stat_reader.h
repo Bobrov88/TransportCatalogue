@@ -16,9 +16,9 @@ namespace Request
 
     Req ParseRequest(const std::string_view request);
 
-    void ParseAndPrintStat(const Data::TransportCatalogue &tansport_catalogue, std::string_view request,
-                           std::ostream &output);
+    void ParseAndPrintStat(const Data::TransportCatalogue& tansport_catalogue, std::string_view request,
+        std::ostream& output);
 }
 
-void put_route_to_output(double value, std::ostream &output);
-void put_curvature_to_output(double value, std::ostream &output);
+void put_route_to_output(double value, std::ostream& output);
+void put_curvature_to_output(double value, std::ostream& output);

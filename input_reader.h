@@ -38,7 +38,7 @@ namespace Input
         /**
          * Наполняет данными транспортный справочник, используя команды из commands_
          */
-        void ApplyCommands(Data::TransportCatalogue &catalogue) const;
+        void ApplyCommands(Data::TransportCatalogue& catalogue) const;
 
     private:
         std::vector<CommandDescription> commands_;

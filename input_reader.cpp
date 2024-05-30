@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <map>
 
 /**
  * Парсит строку вида "10.123,  -30.1837" и возвращает пару координат (широта, долгота)
@@ -20,7 +21,7 @@ Coordinates ParseCoordinates(std::string_view str)
 
     if (comma == str.npos)
     {
-        return {nan, nan};
+        return { nan, nan };
     }
 
     auto not_space2 = str.find_first_not_of(' ', comma + 1);
@@ -28,7 +29,7 @@ Coordinates ParseCoordinates(std::string_view str)
     double lat = std::stod(std::string(str.substr(not_space, comma - not_space)));
     double lng = std::stod(std::string(str.substr(not_space2)));
 
-    return {lat, lng};
+    return { lat, lng };
 }
 
 /**
@@ -108,9 +109,9 @@ CommandDescription ParseCommandDescription(std::string_view line)
         return {};
     }
 
-    return {std::string(line.substr(0, space_pos)),
+    return { std::string(line.substr(0, space_pos)),
             std::string(line.substr(not_space, colon_pos - not_space)),
-            std::string(line.substr(colon_pos + 1))};
+            std::string(line.substr(colon_pos + 1)) };
 }
 
 void InputReader::ParseLine(std::string_view line)
@@ -122,23 +123,24 @@ void InputReader::ParseLine(std::string_view line)
     }
 }
 
-std::unordered_map<std::string_view, int> ParseDistance(std::vector<std::string_view> distances)
+std::map<std::string, int> ParseDistance(std::vector<std::string_view> distances)
 {
-    std::unordered_map<std::string_view, int> parsed_distances;
-    for (auto &distance : distances)
+    std::map<std::string, int> parsed_distances;
+    for (auto& distance : distances)
     {
-        auto last_space = distance.find_last_of(' ');
-        auto stop_name = std::move(distance.substr(last_space + 1));
         auto m_pos = distance.find_first_of('m');
         auto int_distance = std::stoi(std::string(distance.substr(0, m_pos)));
+        auto to_pos = distance.find_first_of(" to ");
+        auto stop_name = distance.substr(to_pos + 4);
         parsed_distances.emplace(std::move(stop_name), std::move(int_distance));
     }
     return parsed_distances;
 }
 
-void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catalogue) const
+void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue& catalogue) const
 {
-    for (const auto &command : commands_)
+    std::unordered_map<std::string_view, std::map<std::string, int>> temp_distances;
+    for (const auto& command : commands_)
     {
         if (command.command == "Stop")
         {
@@ -151,11 +153,16 @@ void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catal
             else
             {
                 catalogue.AddStop(command.id, std::move(ParseCoordinates(std::move(std::string(command.description.begin(), comma2)))));
-                catalogue.AddDistances(command.id, std::move(ParseDistance(Split(std::move(std::string(std::next(comma2), command.description.end())), ','))));
+
+                auto distance = ParseDistance(Split(std::move(std::string(std::next(comma2), command.description.end())), ','));
+                temp_distances.emplace(command.id, std::move(distance));
             }
         }
     }
-    for (const auto &command : commands_)
+
+    catalogue.AddDistances(temp_distances);
+
+    for (const auto& command : commands_)
         if (command.command == "Bus")
-            catalogue.AddBus(std::move(command.id), ParseRoute(command.description));
+            catalogue.AddBus(command.id, ParseRoute(command.description));
 }
