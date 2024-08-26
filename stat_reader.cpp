@@ -19,8 +19,8 @@ Request::Req Request::ParseRequest(const std::string_view request)
     return result;
 }
 
-void Request::ParseAndPrintStat(const Data::TransportCatalogue& transport_catalogue, std::string_view request,
-    std::ostream& output)
+void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalogue, std::string_view request,
+                                std::ostream &output)
 {
     auto parsed = Request::ParseRequest(request);
     output << parsed.request << " "sv << parsed.what << ": "sv;
@@ -53,28 +53,31 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue& transport_catalo
         }
         else
         {
-            std::set<std::string_view> bus_list;
-            for (const auto& [name, bus] : transport_catalogue.GetBuses())
+            auto &bus_route = transport_catalogue.GetBusesAtStop();
+            if (bus_route.count(stop->name))
             {
-                if (std::find(bus->stops.cbegin(), bus->stops.cend(), stop->name) != bus->stops.cend())
-                    bus_list.insert(name);
+                output << "buses"sv;
+                std::set<std::string_view> s;
+                for (const auto& bus : bus_route.at(stop->name))
+                {
+                    s.insert(bus->name);
+                }
+                for (const auto &bus : s)
+                {
+                    output << " "sv << bus;
+                }
+                output << "\n";
             }
-            if (bus_list.empty())
+            else
             {
                 output << "no buses\n";
                 return;
             }
-            output << "buses"sv;
-            for (const auto& bus : bus_list)
-            {
-                output << " "sv << bus;
-            }
-            output << "\n";
         }
     }
 }
 
-void put_route_to_output(double value, std::ostream& output)
+void put_route_to_output(double value, std::ostream &output)
 {
     int precision = 1;
     while (true)
@@ -86,7 +89,7 @@ void put_route_to_output(double value, std::ostream& output)
     output << std::fixed << std::setprecision(6 - precision) << value << " route length, "sv;
 }
 
-void put_curvature_to_output(double value, std::ostream& output)
+void put_curvature_to_output(double value, std::ostream &output)
 {
     output << std::fixed << std::setprecision(5) << value << " curvature\n"sv;
 }

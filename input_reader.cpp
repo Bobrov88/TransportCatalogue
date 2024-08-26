@@ -21,7 +21,7 @@ Coordinates ParseCoordinates(std::string_view str)
 
     if (comma == str.npos)
     {
-        return { nan, nan };
+        return {nan, nan};
     }
 
     auto not_space2 = str.find_first_not_of(' ', comma + 1);
@@ -29,7 +29,7 @@ Coordinates ParseCoordinates(std::string_view str)
     double lat = std::stod(std::string(str.substr(not_space, comma - not_space)));
     double lng = std::stod(std::string(str.substr(not_space2)));
 
-    return { lat, lng };
+    return {lat, lng};
 }
 
 /**
@@ -109,9 +109,9 @@ CommandDescription ParseCommandDescription(std::string_view line)
         return {};
     }
 
-    return { std::string(line.substr(0, space_pos)),
+    return {std::string(line.substr(0, space_pos)),
             std::string(line.substr(not_space, colon_pos - not_space)),
-            std::string(line.substr(colon_pos + 1)) };
+            std::string(line.substr(colon_pos + 1))};
 }
 
 void InputReader::ParseLine(std::string_view line)
@@ -126,7 +126,7 @@ void InputReader::ParseLine(std::string_view line)
 std::map<std::string, int> ParseDistance(std::vector<std::string_view> distances)
 {
     std::map<std::string, int> parsed_distances;
-    for (auto& distance : distances)
+    for (auto &distance : distances)
     {
         auto m_pos = distance.find_first_of('m');
         auto int_distance = std::stoi(std::string(distance.substr(0, m_pos)));
@@ -137,10 +137,10 @@ std::map<std::string, int> ParseDistance(std::vector<std::string_view> distances
     return parsed_distances;
 }
 
-void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue& catalogue) const
+void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catalogue) const
 {
     std::unordered_map<std::string_view, std::map<std::string, int>> temp_distances;
-    for (const auto& command : commands_)
+    for (const auto &command : commands_)
     {
         if (command.command == "Stop")
         {
@@ -162,7 +162,9 @@ void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue& catal
 
     catalogue.AddDistances(temp_distances);
 
-    for (const auto& command : commands_)
+    for (const auto &command : commands_)
         if (command.command == "Bus")
             catalogue.AddBus(command.id, ParseRoute(command.description));
+
+    catalogue.AddBusesToStop();
 }

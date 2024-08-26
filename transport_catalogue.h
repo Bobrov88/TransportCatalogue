@@ -26,12 +26,15 @@ namespace Data
 
     public:
         void AddBus(std::string_view name, std::vector<std::string_view> stops);
-        void AddStop(std::string_view name, Coordinates&& coordinates);
+        void AddStop(std::string_view name, Coordinates &&coordinates);
+        void AddBusesToStop();
+        const std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> &GetBusesAtStop() const;
+        const std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> &GetStopsAtBus() const;
         void AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>> distances);
-        const Bus* GetBus(std::string_view bus) const;
-        const Stop* GetStop(std::string_view stop) const;
-        const std::unordered_map<std::string_view, const Bus*, Bus_Hash>& GetBuses() const;
-        const std::unordered_map<std::string_view, const Stop*, Stop_Hash>& GetStops() const;
+        const Bus *GetBus(std::string_view bus) const;
+        const Stop *GetStop(std::string_view stop) const;
+        const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &GetBuses() const;
+        const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &GetStops() const;
         size_t GetStopCount(std::string_view bus) const;
         size_t GetUniqueStopCount(std::string_view bus) const;
         double GetRouteLength(std::string_view bus) const;
@@ -44,7 +47,7 @@ namespace Data
             std::string name;
             Coordinates coordinates;
 
-            bool operator==(const Stop& stop) const
+            bool operator==(const Stop &stop) const
             {
                 return name == stop.name && coordinates == stop.coordinates;
             }
@@ -53,9 +56,8 @@ namespace Data
         struct Bus
         {
             std::string name;
-            std::deque<std::string_view> stops;
 
-            bool operator==(const Bus& bus) const
+            bool operator==(const Bus &bus) const
             {
                 return name == bus.name;
             }
@@ -78,18 +80,21 @@ namespace Data
             }
         };
 
-        struct Dist_Hash {
-            size_t operator()(std::pair<const Stop*, const Stop*> pair_of_names) const {
-                return  std::hash<const void*>{}(pair_of_names.first) +
-                    std::hash<const void*>{}(pair_of_names.second);
+        struct Dist_Hash
+        {
+            size_t operator()(std::pair<const Stop *, const Stop *> pair_of_names) const
+            {
+                return std::hash<const void *>{}(pair_of_names.first) +
+                       std::hash<const void *>{}(pair_of_names.second);
             }
         };
 
         std::list<Bus> b_;
         std::list<Stop> st_;
-        std::unordered_map<std::string_view, const Bus*, Bus_Hash> buses_;
-        std::unordered_map<std::string_view, const Stop*, Stop_Hash> stops_;
-        std::unordered_map<std::pair<const Stop*, const Stop*>, int, Dist_Hash> distances_;
-
+        std::unordered_map<std::string_view, const Bus *, Bus_Hash> buses_;
+        std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
+        std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> buses_at_stop_;
+        std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> stops_at_bus_;
+        std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> distances_;
     };
 }
