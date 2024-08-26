@@ -4,19 +4,23 @@ project(TC CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCES
-    input_reader.cpp
-    main.cpp
-    stat_reader.cpp
-    transport_catalogue.cpp
-)
+file(GLOB SRC *.cpp)
+file(GLOB HDR *.h)
 
-set(HEADERS
-    geo.h
-    input_reader.h
-    stat_reader.h
-    transport_catalogue.h
-)
+#set(SOURCES
+#    input_reader.cpp
+#    main.cpp
+#    stat_reader.cpp
+#    transport_catalogue.cpp
+#
+#)
+#
+#set(HEADERS
+#    geo.h
+#    input_reader.h
+#    stat_reader.h
+#    transport_catalogue.h
+#)
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SRC} ${HDR})
 target_compile_options(${PROJECT_NAME} PRIVATE /Wall /W4)

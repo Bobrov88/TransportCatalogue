@@ -12,7 +12,7 @@
 #include <string_view>
 #include "geo.h"
 
-using Geo::Coordinates;
+using geo::Coordinates;
 
 namespace Data
 {
