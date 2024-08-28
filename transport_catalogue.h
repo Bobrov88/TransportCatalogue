@@ -3,26 +3,29 @@
 #include <string>
 #include <deque>
 #include <iostream>
-#include <set>
 #include <list>
 #include <algorithm>
 #include <unordered_map>
 #include <map>
 #include <vector>
 #include <string_view>
-#include "geo.h"
-
-using geo::Coordinates;
+#include "domain.h"
 
 namespace Data
 {
+    using geo::Coordinates;
+    using namespace entity;
+    using namespace entity::hashers;
+
     class TransportCatalogue
     {
-        struct Bus;
-        struct Stop;
-        struct Bus_Hash;
-        struct Stop_Hash;
-        struct Dist_Hash;
+        std::list<Bus> b_;
+        std::list<Stop> st_;
+        std::unordered_map<std::string_view, const Bus *, Bus_Hash> buses_;
+        std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
+        std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> buses_at_stop_;
+        std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> stops_at_bus_;
+        std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> distances_;
 
     public:
         void AddBus(std::string_view name, std::vector<std::string_view> stops);
@@ -40,61 +43,5 @@ namespace Data
         double GetRouteLength(std::string_view bus) const;
         int GetRealRouteLength(std::string_view bus) const;
         int GetDistanceBetweenStops(std::string_view from, std::string_view to) const;
-
-    private:
-        struct Stop
-        {
-            std::string name;
-            Coordinates coordinates;
-
-            bool operator==(const Stop &stop) const
-            {
-                return name == stop.name && coordinates == stop.coordinates;
-            }
-        };
-
-        struct Bus
-        {
-            std::string name;
-
-            bool operator==(const Bus &bus) const
-            {
-                return name == bus.name;
-            }
-        };
-
-        struct Bus_Hash
-        {
-            size_t operator()(std::string_view name) const
-            {
-                return std::hash<std::string_view>{}(name);
-            }
-        };
-
-        struct Stop_Hash
-        {
-            size_t operator()(std::string_view name) const
-            {
-                // return static_cast<size_t>(static_cast<int>((stop.coordinates.lat * stop.coordinates.lng * 100000.0)));
-                return std::hash<std::string_view>{}(name);
-            }
-        };
-
-        struct Dist_Hash
-        {
-            size_t operator()(std::pair<const Stop *, const Stop *> pair_of_names) const
-            {
-                return std::hash<const void *>{}(pair_of_names.first) +
-                       std::hash<const void *>{}(pair_of_names.second);
-            }
-        };
-
-        std::list<Bus> b_;
-        std::list<Stop> st_;
-        std::unordered_map<std::string_view, const Bus *, Bus_Hash> buses_;
-        std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
-        std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> buses_at_stop_;
-        std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> stops_at_bus_;
-        std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> distances_;
     };
 }

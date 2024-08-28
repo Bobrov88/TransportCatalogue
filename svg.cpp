@@ -223,7 +223,6 @@ namespace svg
 
     namespace detail
     {
-
         void HtmlEncodeString(std::ostream &out, std::string_view sv)
         {
             for (char c : sv)

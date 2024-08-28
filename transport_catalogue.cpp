@@ -1,4 +1,5 @@
 #include "transport_catalogue.h"
+#include <set>
 
 using namespace Data;
 
@@ -43,7 +44,7 @@ void TransportCatalogue::AddDistances(std::unordered_map<std::string_view, std::
     }
 }
 
-const TransportCatalogue::Bus *TransportCatalogue::GetBus(std::string_view bus) const
+const Bus *TransportCatalogue::GetBus(std::string_view bus) const
 {
     if (buses_.find(bus) != buses_.end())
         return buses_.at(bus);
@@ -51,7 +52,7 @@ const TransportCatalogue::Bus *TransportCatalogue::GetBus(std::string_view bus) 
         return nullptr;
 }
 
-const TransportCatalogue::Stop *TransportCatalogue::GetStop(std::string_view stop) const
+const Stop *TransportCatalogue::GetStop(std::string_view stop) const
 {
     if (stops_.find(stop) != stops_.end())
         return stops_.at(stop);
@@ -100,22 +101,22 @@ int TransportCatalogue::GetDistanceBetweenStops(std::string_view from, std::stri
     return distances_.find({stops_.at(to), stops_.at(from)})->second;
 }
 
-const std::unordered_map<std::string_view, const TransportCatalogue::Bus *, TransportCatalogue::Bus_Hash> &TransportCatalogue::GetBuses() const
+const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &TransportCatalogue::GetBuses() const
 {
     return buses_;
 }
 
-const std::unordered_map<std::string_view, const TransportCatalogue::Stop *, TransportCatalogue::Stop_Hash> &TransportCatalogue::GetStops() const
+const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &TransportCatalogue::GetStops() const
 {
     return stops_;
 }
 
-const std::unordered_map<std::string_view, std::deque<const TransportCatalogue::Bus *>, TransportCatalogue::Stop_Hash> &TransportCatalogue::GetBusesAtStop() const
+const std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> &TransportCatalogue::GetBusesAtStop() const
 {
     return buses_at_stop_;
 }
 
-const std::unordered_map<std::string_view, std::deque<const TransportCatalogue::Stop *>, TransportCatalogue::Bus_Hash> &TransportCatalogue::GetStopsAtBus() const
+const std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> &TransportCatalogue::GetStopsAtBus() const
 {
     return stops_at_bus_;
 }

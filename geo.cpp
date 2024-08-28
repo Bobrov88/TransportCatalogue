@@ -1,9 +1,20 @@
 #pragma once
 #include "geo.h"
 #include <cmath>
+#define EPSILON 0.000001
 
 namespace geo
 {
+    bool Coordinates::operator==(const Coordinates &other) const
+    {
+        return std::abs(lat - other.lat) < EPSILON &&
+               std::abs(lng - other.lng) < EPSILON;
+    }
+    bool Coordinates::operator!=(const Coordinates &other) const
+    {
+        return !(*this == other);
+    }
+
     double ComputeDistance(Coordinates from, Coordinates to)
     {
         using namespace std;
