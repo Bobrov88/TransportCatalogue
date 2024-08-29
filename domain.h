@@ -14,6 +14,7 @@ namespace entity
     struct Bus
     {
         std::string name;
+        bool isRoundTrip;
         bool operator==(const Bus &bus) const;
     };
 
