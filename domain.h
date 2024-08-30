@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 #include "geo.h"
 
 namespace entity
@@ -14,8 +15,19 @@ namespace entity
     struct Bus
     {
         std::string name;
-        bool isRoundTrip;
+    //    bool isRoundTrip;
         bool operator==(const Bus &bus) const;
+    };
+
+    struct BusStat {
+        double curvature_;
+        int route_length_;
+        int stop_count_;
+        int unique_stop_count_;
+    };
+
+    struct BusPtr {
+        int route_number;
     };
 
     namespace hashers

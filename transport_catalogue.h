@@ -29,8 +29,8 @@ namespace Data
 
     public:
         void AddBus(std::string_view name, std::vector<std::string_view> stops);
-        void SetBusTripType(std::string_view name, bool isRoundTrip) noexcept;
-        bool IsBusTripType(std::string_view name) const;
+        // void SetBusTripType(std::string_view name, bool isRoundTrip) noexcept;
+        // bool IsBusTripType(std::string_view name) const;
         void AddStop(std::string_view name, Coordinates &&coordinates);
         void AddBusesToStop();
         const std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> &GetBusesAtStop() const;
