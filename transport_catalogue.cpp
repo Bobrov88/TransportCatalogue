@@ -13,16 +13,6 @@ void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_v
         stops_at_bus_[b_.back().name].push_back(stops_.at(stop));
 }
 
-// void TransportCatalogue::SetBusTripType(std::string_view name, bool isRoundtrip) noexcept
-// {
-    
-// }
-
-// bool IsBusTripType(std::string_view name) const
-// {
-//     return buses_.at(name)->isRoundTrip;
-// }
-
 void TransportCatalogue::AddStop(std::string_view name, Coordinates &&coordinates)
 {
     Stop stop;
@@ -78,15 +68,8 @@ size_t TransportCatalogue::GetStopCount(std::string_view bus) const
 size_t TransportCatalogue::GetUniqueStopCount(std::string_view bus) const
 {
     auto &stops = stops_at_bus_.at(bus);
-    // if (IsBusTripType(bus))
-    // {
-        std::set<const Stop *> unique_stop{stops.cbegin(), stops.cend()};
-        return unique_stop.size();
-    // }
-    // else
-    // {
-    //     return stops.size();
-    // }
+    std::set<const Stop *> unique_stop{stops.cbegin(), stops.cend()};
+    return unique_stop.size();
 }
 
 double TransportCatalogue::GetRouteLength(std::string_view bus) const

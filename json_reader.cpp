@@ -11,11 +11,12 @@ void JsonReader::FillTransportCatalogue()
 
 void JsonReader::FillDataBase(const Node &node)
 {
+    distances temp_distances;
     for (const auto &arr : node.AsArray())
     {
         const auto &data = arr.AsMap();
         if (data.at("type") == "Stop")
-            FillStops(data);
+            FillStops(data, temp_distances);
     }
     for (const auto &arr : node.AsArray())
     {
@@ -23,20 +24,31 @@ void JsonReader::FillDataBase(const Node &node)
         if (data.at("type") == "Bus")
             FillBuses(data);
     }
-    FillDistances();
+    db_.AddDistances(temp_distances);
 }
 
-void JsonReader::FillStops(const Dict &node)
+void JsonReader::FillStops(const Dict &node, distances &temp_distances)
 {
-    db_.AddBus(node.at("name"),
-               {node.at("stops").AsArray().begin(),
-                node.at("stops").AsArray().end()});
+    db_.AddStop(node.at("name").AsString(),
+                {node.at("latitude").AsDouble(),
+                 node.at("longitude").AsDouble()});
+    if (node.count("road_distances"))
+    {
+        const auto &road_distances = node.at("road_distances").AsMap();
+        for (const auto &[key, value] : road_distances)
+            temp_distances[node.at("name").AsString()]
+            [key] 
+            = value.AsInt();
+    }
 }
 
 void JsonReader::FillBuses(const Dict &node)
 {
-    db_.AddStop(node.at("name"),
-                {node.at("latitude"),
-                 node.at("longitude")});
-    db_.AddDistances({node.at("name"), {node.at("road_distances").AsMap().begin(),node.at("road_distances").AsMap().end()}});
+    const auto &stop_array = node.at("stops").AsArray();
+    std::vector<std::string_view> stops{stop_array.begin(), stop_array.end()};
+    if (!node.at("is_roundtrip").AsBool())
+    {
+        stops.insert(stops.end(), std::next(stop_array.rbegin()), stop_array.rend());
+    }
+    db_.AddBus(node.at("name").AsString(), std::move(stops));
 }
