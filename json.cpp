@@ -18,7 +18,7 @@ namespace json
                 {
                     if ('l' == input.get())
                     {
-                        char end = input.get();
+                        char end = static_cast<char>(input.get());
                         if ((end > 45 && end < 92) || (end > 93 && end < 125))
                             throw ParsingError("Redundant symbols after null");
                         input.putback(end);
@@ -31,7 +31,7 @@ namespace json
 
         Node LoadBool(std::istream &input)
         {
-            char c = input.get();
+            char c = static_cast<char>(input.get());
             if ('t' == c)
             {
                 if ('r' == input.get())
@@ -40,7 +40,7 @@ namespace json
                     {
                         if ('e' == input.get())
                         {
-                            char end = input.get();
+                            char end = static_cast<char>(input.get());
                             if ((end > 45 && end < 92) || (end > 93 && end < 125))
                                 throw ParsingError("Redundant symbols after true");
                             input.putback(end);
@@ -61,7 +61,7 @@ namespace json
                             {
                                 if ('e' == input.get())
                                 {
-                                    char end = input.get();
+                                    char end = static_cast<char>(input.get());
                                     if ((end > 45 && end < 92) || (end > 93 && end < 125))
                                         throw ParsingError("Redundant symbols after false");
                                     input.putback(end);

@@ -12,7 +12,7 @@ namespace json
         Data::TransportCatalogue &db_;
         std::istream &in_;
         void FillDataBase(const Node &node);
-        void FillStops(const Dict &node, distances& temp_distances);
+        void FillStops(const Dict &node, distances &temp_distances);
         void FillBuses(const Dict &node);
 
     public:
