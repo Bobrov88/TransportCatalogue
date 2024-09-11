@@ -31,6 +31,4 @@ int main()
     //     getline(cin, line);
     //     Request::ParseAndPrintStat(catalogue, line, cout);
     // }
-    TransportCatalogue db;
-    JsonReader reader(db, std::cin);
 }

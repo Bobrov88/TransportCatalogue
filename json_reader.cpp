@@ -2,11 +2,12 @@
 
 using namespace json;
 
-void JsonReader::FillTransportCatalogue()
+void JsonReader::ProcessTransportCatalogue()
 {
     Document doc(std::move(Load(in_)));
     const auto &dict = doc.GetRoot().AsMap();
     FillDataBase(dict.at("base_request"));
+    GetResponce(dict.at("stat_requests"));
 }
 
 void JsonReader::FillDataBase(const Node &node)
@@ -50,9 +51,89 @@ void JsonReader::FillBuses(const Dict &node)
                    { return el.AsString(); });
     if (!node.at("is_roundtrip").AsBool())
     {
-        std::transform(std::next(stop_array.crbegin()), stop_array.crend(), stops.end(),
+        auto &end = stops.end();
+        std::transform(std::next(stop_array.crbegin()), stop_array.crend(), end,
                        [&stops](const auto &el)
                        { return el.AsString(); });
     }
     db_.AddBus(node.at("name").AsString(), std::move(stops));
+}
+
+void JsonReader::GetResponce(const Node &node)
+{
+    using namespace std::string_view_literals;
+    out_ << "["sv;
+    bool is_first = true;
+    for (const auto &req : node.AsArray())
+    {
+        if (!is_first)
+        {
+            out_ << ","sv;
+            is_first = false;
+        }
+        const auto &stat = req.AsMap();
+        if (stat.at("type").AsString() == "Stop")
+        {
+            const auto *stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
+            ConstructJson(stop_responce, stat.at("request_id").AsInt());
+        }
+        if (stat.at("type").AsString() == "Bus")
+        {
+            const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
+            ConstructJson(bus_responce, stat.at("request_id").AsInt());
+        }
+    }
+    out_ << "]"sv;
+}
+
+void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> *buses, int request_id)
+{
+    using namespace std::string_view_literals;
+    out_ << "{"sv;
+    out_ << "\"request_id\":"sv;
+    out_ << request_id;
+    out_ << ","sv;
+    if (!buses)
+    {
+        out_ << "\"error_message\":\"not found\""sv;
+    }
+    else
+    {
+        out_ << "\"buses\":["sv;
+        bool is_first = true;
+        for (const auto &bus : *buses)
+        {
+            if (!is_first)
+            {
+                out_ << ","sv;
+                is_first = false;
+            }
+            out_ << "\""sv;
+            out_ << bus;
+            out_ << "\""sv;
+        }
+        out_ << "]"sv;
+    }
+    out_ << "}"sv;
+}
+
+void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, int request_id)
+{
+    using namespace std::string_view_literals;
+    out_ << "{"sv;
+    out_ << "\"request_id\":"sv;
+    out_ << request_id;
+    out_ << ","sv;
+    if (!busstat)
+    {
+        out_ << "\"error_message\":\"not found\""sv;
+    }
+    else
+    {
+        out_ << "\"curvature\":"sv << busstat->curvature_ << ","sv;
+        out_ << "\"route_length\":"sv << busstat->route_length_ << ","sv;
+        out_ << "\"stop_count\":"sv << busstat->stop_count_ << ","sv;
+        out_ << "\"unique_stop_count\":"sv << busstat->unique_stop_count_;
+    }
+    out_ << "}"sv;
 }

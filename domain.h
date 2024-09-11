@@ -25,9 +25,7 @@ namespace entity
         int unique_stop_count_;
     };
 
-    struct BusPtr {
-        int route_number;
-    };
+    using BusPtr = std::string_view;
 
     namespace hashers
     {
