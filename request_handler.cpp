@@ -17,7 +17,7 @@ const std::unordered_set<BusPtr> *RequestHandler::GetBusesByStop(const std::stri
     if (db_.GetStop(stop_name) == nullptr)
         return {};
     const auto &busesAtStop = db_.GetBusesAtStop().at(stop_name);
-    std::unordered_set<BusPtr> *buses = nullptr;
+    auto *buses = new std::unordered_set<BusPtr>();
     for (const auto &el : busesAtStop)
     {
         buses->insert(el->name);

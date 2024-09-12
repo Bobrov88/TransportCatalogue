@@ -51,7 +51,7 @@ void JsonReader::FillBuses(const Dict &node)
                    { return el.AsString(); });
     if (!node.at("is_roundtrip").AsBool())
     {
-        auto &end = stops.end();
+        auto end = stops.end();
         std::transform(std::next(stop_array.crbegin()), stop_array.crend(), end,
                        [&stops](const auto &el)
                        { return el.AsString(); });
@@ -89,10 +89,7 @@ void JsonReader::GetResponce(const Node &node)
 void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> *buses, int request_id)
 {
     using namespace std::string_view_literals;
-    out_ << "{"sv;
-    out_ << "\"request_id\":"sv;
-    out_ << request_id;
-    out_ << ","sv;
+    out_ << "{\"request_id\":"sv << request_id << ","sv;
     if (!buses)
     {
         out_ << "\"error_message\":\"not found\""sv;
@@ -120,10 +117,7 @@ void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> *buses, 
 void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, int request_id)
 {
     using namespace std::string_view_literals;
-    out_ << "{"sv;
-    out_ << "\"request_id\":"sv;
-    out_ << request_id;
-    out_ << ","sv;
+    out_ << "{\"request_id\":"sv << request_id << ","sv;
     if (!busstat)
     {
         out_ << "\"error_message\":\"not found\""sv;

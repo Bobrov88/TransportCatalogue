@@ -18,11 +18,12 @@ namespace entity
         bool operator==(const Bus &bus) const;
     };
 
-    struct BusStat {
+    struct BusStat
+    {
         double curvature_;
-        int route_length_;
-        int stop_count_;
-        int unique_stop_count_;
+        double route_length_;
+        size_t stop_count_;
+        size_t unique_stop_count_;
     };
 
     using BusPtr = std::string_view;

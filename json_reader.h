@@ -9,10 +9,10 @@ namespace json
     class JsonReader
     {
         using distances = std::unordered_map<std::string_view, std::map<std::string, int>>;
-        Data::TransportCatalogue &db_;
+        TransportCatalogue &db_;
         std::istream &in_;
-        std::ostream &out_;
         RequestHandler &rh_;
+        std::ostream &out_;
         void FillDataBase(const Node &node);
         void FillStops(const Dict &node, distances &temp_distances);
         void FillBuses(const Dict &node);

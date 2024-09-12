@@ -8,4 +8,4 @@ file(GLOB SRC *.cpp)
 file(GLOB HDR *.h)
 
 add_executable(${PROJECT_NAME} ${SRC} ${HDR})
-target_compile_options(${PROJECT_NAME} PRIVATE /Wall /W4)
+target_compile_options(${PROJECT_NAME} PRIVATE /Wall /W4 /WX)

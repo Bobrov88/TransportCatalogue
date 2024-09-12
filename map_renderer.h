@@ -5,6 +5,6 @@ namespace renderer
     class MapRenderer
     {
         public:
-        int a;
+        int a = 0;
     };
 }
