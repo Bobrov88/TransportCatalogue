@@ -1,9 +1,12 @@
 #include "request_handler.h"
+#include <cassert>
 
 std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_name) const
 {
     if (db_.GetBus(bus_name) == nullptr)
+    {
         return std::nullopt;
+    }
     BusStat busstat;
     busstat.stop_count_ = db_.GetStopCount(bus_name);
     busstat.unique_stop_count_ = db_.GetUniqueStopCount(bus_name);
@@ -12,15 +15,17 @@ std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_na
     return busstat;
 }
 
-const std::unordered_set<BusPtr> *RequestHandler::GetBusesByStop(const std::string_view &stop_name) const
+const std::unordered_set<BusPtr> RequestHandler::GetBusesByStop(const std::string_view &stop_name) const
 {
     if (db_.GetStop(stop_name) == nullptr)
+    {
         return {};
+    }
     const auto &busesAtStop = db_.GetBusesAtStop().at(stop_name);
-    auto *buses = new std::unordered_set<BusPtr>();
+    std::unordered_set<BusPtr> buses;
     for (const auto &el : busesAtStop)
     {
-        buses->insert(el->name);
+        buses.insert(el->name);
     }
     return buses;
 }

@@ -1,7 +1,6 @@
 #include "input_reader.h"
 
 #include <algorithm>
-#include <cassert>
 #include <iterator>
 #include <map>
 

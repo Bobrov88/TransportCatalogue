@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include <cassert>
 
 using namespace json;
 
@@ -6,7 +7,7 @@ void JsonReader::ProcessTransportCatalogue()
 {
     Document doc(std::move(Load(in_)));
     const auto &dict = doc.GetRoot().AsMap();
-    FillDataBase(dict.at("base_request"));
+    FillDataBase(dict.at("base_requests"));
     GetResponce(dict.at("stat_requests"));
 }
 
@@ -18,6 +19,7 @@ void JsonReader::FillDataBase(const Node &node)
         const auto &data = arr.AsMap();
         if (data.at("type") == "Stop")
             FillStops(data, temp_distances);
+            assert(db_.GetStop(data.at("name").AsString()));
     }
     for (const auto &arr : node.AsArray())
     {
@@ -39,6 +41,7 @@ void JsonReader::FillStops(const Dict &node, distances &temp_distances)
         for (const auto &[key, value] : road_distances)
             temp_distances[node.at("name").AsString()][key] = value.AsInt();
     }
+    assert(db_.GetStop(node.at("name").AsString()));
 }
 
 void JsonReader::FillBuses(const Dict &node)
@@ -74,23 +77,23 @@ void JsonReader::GetResponce(const Node &node)
         const auto &stat = req.AsMap();
         if (stat.at("type").AsString() == "Stop")
         {
-            const auto *stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
-            ConstructJson(stop_responce, stat.at("request_id").AsInt());
+            const auto stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
+            ConstructJson(stop_responce, stat.at("id").AsInt());
         }
         if (stat.at("type").AsString() == "Bus")
         {
             const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
-            ConstructJson(bus_responce, stat.at("request_id").AsInt());
+            ConstructJson(bus_responce, stat.at("id").AsInt());
         }
     }
     out_ << "]"sv;
 }
 
-void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> *buses, int request_id)
+void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> &buses, int request_id)
 {
     using namespace std::string_view_literals;
     out_ << "{\"request_id\":"sv << request_id << ","sv;
-    if (!buses)
+    if (buses.empty())
     {
         out_ << "\"error_message\":\"not found\""sv;
     }
@@ -98,7 +101,7 @@ void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> *buses, 
     {
         out_ << "\"buses\":["sv;
         bool is_first = true;
-        for (const auto &bus : *buses)
+        for (const auto &bus : buses)
         {
             if (!is_first)
             {
