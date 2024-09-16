@@ -6,8 +6,22 @@ void JsonReader::ProcessTransportCatalogue()
 {
     Document doc(std::move(Load(in_)));
     const auto &dict = doc.GetRoot().AsMap();
-    FillDataBase(dict.at("base_requests"));
-    GetResponce(dict.at("stat_requests"));
+    try
+    {
+        FillDataBase(dict.at("base_requests"));
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "Error processing 1 " << e.what() << "\n";
+    }
+    try
+    {
+        GetResponce(dict.at("stat_requests"));
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "Error processing 2 " << e.what() << "\n";
+    }
 }
 
 void JsonReader::FillDataBase(const Node &node)
@@ -17,18 +31,14 @@ void JsonReader::FillDataBase(const Node &node)
     {
         const auto &data = arr.AsMap();
         if (data.at("type").AsString() == "Stop")
-        {
             FillStops(data, temp_distances);
-        }
     }
     db_.AddDistances(std::move(temp_distances));
     for (const auto &arr : node.AsArray())
     {
         const auto &data = arr.AsMap();
         if (data.at("type").AsString() == "Bus")
-        {
             FillBuses(data);
-        }
     }
     db_.AddBusesToStop();
 }
@@ -71,7 +81,6 @@ void JsonReader::GetResponce(const Node &node)
         if (!is_first)
         {
             out_ << ","sv;
-            is_first = false;
         }
         const auto &stat = req.AsMap();
         if (stat.at("type").AsString() == "Stop")
@@ -79,11 +88,12 @@ void JsonReader::GetResponce(const Node &node)
             const auto stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
             ConstructJson(stop_responce, stat.at("id").AsInt());
         }
-        if (stat.at("type").AsString() == "Bus")
+        else /*if (stat.at("type").AsString() == "Bus")*/
         {
             const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
             ConstructJson(bus_responce, stat.at("id").AsInt());
         }
+        is_first = false;
     }
     out_ << "]"sv;
 }
@@ -105,11 +115,11 @@ void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> &buses, 
             if (!is_first)
             {
                 out_ << ","sv;
-                is_first = false;
             }
             out_ << "\""sv;
             out_ << bus;
             out_ << "\""sv;
+            is_first = false;
         }
         out_ << "]"sv;
     }

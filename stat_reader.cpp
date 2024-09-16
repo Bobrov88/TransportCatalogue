@@ -32,15 +32,15 @@ void Request::ParseAndPrintStat(const Data::TransportCatalogue &transport_catalo
         }
         else
         {
-            size_t stop_on_route = transport_catalogue.GetStopCount(parsed.what);
-            size_t unique_stop_on_route = transport_catalogue.GetUniqueStopCount(parsed.what);
-            int real_route_length = transport_catalogue.GetRealRouteLength(parsed.what);
-            double route_length = transport_catalogue.GetRouteLength(parsed.what);
-            double curvature = static_cast<double>(real_route_length) / route_length;
-            output << stop_on_route << " stops on route, "sv;
-            output << unique_stop_on_route << " unique stops, "sv;
-            output << real_route_length << " route length, "sv;
-            put_curvature_to_output(curvature, output);
+            // size_t stop_on_route = transport_catalogue.GetStopCount(parsed.what);
+            // size_t unique_stop_on_route = transport_catalogue.GetUniqueStopCount(parsed.what);
+            // int real_route_length = transport_catalogue.GetRealRouteLength(parsed.what);
+            // double route_length = transport_catalogue.GetRouteLength(parsed.what);
+            // double curvature = static_cast<double>(real_route_length) / route_length;
+            // output << stop_on_route << " stops on route, "sv;
+            // output << unique_stop_on_route << " unique stops, "sv;
+            // output << real_route_length << " route length, "sv;
+            // put_curvature_to_output(curvature, output);
         }
         return;
     }
