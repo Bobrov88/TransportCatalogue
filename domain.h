@@ -21,7 +21,7 @@ namespace entity
     struct BusStat
     {
         double curvature_;
-        double route_length_;
+        int route_length_;
         size_t stop_count_;
         size_t unique_stop_count_;
     };
