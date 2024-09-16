@@ -33,7 +33,7 @@ void TransportCatalogue::AddBusesToStop()
     }
 }
 
-void TransportCatalogue::AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>> distances)
+void TransportCatalogue::AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>> &&distances)
 {
     for (auto &[key1, value1] : distances)
     {

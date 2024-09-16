@@ -159,7 +159,7 @@ void InputReader::ApplyCommands([[maybe_unused]] Data::TransportCatalogue &catal
         }
     }
 
-    catalogue.AddDistances(temp_distances);
+    catalogue.AddDistances(std::move(temp_distances));
 
     for (const auto &command : commands_)
         if (command.command == "Bus")

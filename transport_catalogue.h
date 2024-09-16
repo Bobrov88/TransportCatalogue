@@ -33,7 +33,7 @@ namespace Data
         void AddBusesToStop();
         const std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> &GetBusesAtStop() const;
         const std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> &GetStopsAtBus() const;
-        void AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>> distances);
+        void AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>>&& distances);
         const Bus *GetBus(std::string_view bus) const;
         const Stop *GetStop(std::string_view stop) const;
         const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &GetBuses() const;

@@ -1,5 +1,4 @@
 #include "json_reader.h"
-#include <cassert>
 
 using namespace json;
 
@@ -17,17 +16,21 @@ void JsonReader::FillDataBase(const Node &node)
     for (const auto &arr : node.AsArray())
     {
         const auto &data = arr.AsMap();
-        if (data.at("type") == "Stop")
+        if (data.at("type").AsString() == "Stop")
+        {
             FillStops(data, temp_distances);
-            assert(db_.GetStop(data.at("name").AsString()));
+        }
     }
+    db_.AddDistances(std::move(temp_distances));
     for (const auto &arr : node.AsArray())
     {
         const auto &data = arr.AsMap();
-        if (data.at("type") == "Bus")
+        if (data.at("type").AsString() == "Bus")
+        {
             FillBuses(data);
+        }
     }
-    db_.AddDistances(temp_distances);
+    db_.AddBusesToStop();
 }
 
 void JsonReader::FillStops(const Dict &node, distances &temp_distances)
@@ -41,7 +44,6 @@ void JsonReader::FillStops(const Dict &node, distances &temp_distances)
         for (const auto &[key, value] : road_distances)
             temp_distances[node.at("name").AsString()][key] = value.AsInt();
     }
-    assert(db_.GetStop(node.at("name").AsString()));
 }
 
 void JsonReader::FillBuses(const Dict &node)
@@ -49,15 +51,12 @@ void JsonReader::FillBuses(const Dict &node)
     const auto &stop_array = node.at("stops").AsArray();
     std::vector<std::string_view> stops;
     stops.reserve(stop_array.size() * 2);
-    std::transform(stop_array.cbegin(), stop_array.cend(), stops.begin(),
-                   [&stops](const auto &el)
-                   { return el.AsString(); });
+    std::for_each(stop_array.cbegin(), stop_array.cend(), [&stops](const auto &el)
+                  { stops.push_back(el.AsString()); });
     if (!node.at("is_roundtrip").AsBool())
     {
-        auto end = stops.end();
-        std::transform(std::next(stop_array.crbegin()), stop_array.crend(), end,
-                       [&stops](const auto &el)
-                       { return el.AsString(); });
+        std::for_each(std::next(stop_array.crbegin()), stop_array.crend(), [&stops](const auto &el)
+                      { stops.push_back(el.AsString()); });
     }
     db_.AddBus(node.at("name").AsString(), std::move(stops));
 }

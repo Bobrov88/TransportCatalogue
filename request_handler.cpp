@@ -1,5 +1,4 @@
 #include "request_handler.h"
-#include <cassert>
 
 std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_name) const
 {
