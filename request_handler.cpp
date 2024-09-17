@@ -14,17 +14,20 @@ std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_na
     return busstat;
 }
 
-const std::unordered_set<BusPtr> RequestHandler::GetBusesByStop(const std::string_view &stop_name) const
+const std::optional<std::unordered_set<BusPtr>> RequestHandler::GetBusesByStop(const std::string_view &stop_name) const
 {
     if (db_.GetStop(stop_name) == nullptr)
     {
-        return {};
+        return std::nullopt;
     }
-    const auto &busesAtStop = db_.GetBusesAtStop().at(stop_name);
     std::unordered_set<BusPtr> buses;
-    for (const auto &el : busesAtStop)
+    if (db_.GetBusesAtStop().count(stop_name))
     {
-        buses.insert(el->name);
+        const auto &busesAtStop = db_.GetBusesAtStop().at(stop_name);
+        for (const auto &el : busesAtStop)
+        {
+            buses.insert(el->name);
+        }
     }
     return buses;
 }

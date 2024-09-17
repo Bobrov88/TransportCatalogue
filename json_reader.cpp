@@ -4,24 +4,10 @@ using namespace json;
 
 void JsonReader::ProcessTransportCatalogue()
 {
-    Document doc(std::move(Load(in_)));
+    Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
-    try
-    {
-        FillDataBase(dict.at("base_requests"));
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << "Error processing 1 " << e.what() << "\n";
-    }
-    try
-    {
-        GetResponce(dict.at("stat_requests"));
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << "Error processing 2 " << e.what() << "\n";
-    }
+    FillDataBase(dict.at("base_requests"));
+    GetResponce(dict.at("stat_requests"));
 }
 
 void JsonReader::FillDataBase(const Node &node)
@@ -98,19 +84,20 @@ void JsonReader::GetResponce(const Node &node)
     out_ << "]"sv;
 }
 
-void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> &buses, int request_id)
+void JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id)
 {
     using namespace std::string_view_literals;
     out_ << "{\"request_id\":"sv << request_id << ","sv;
-    if (buses.empty())
+    if (buses == std::nullopt)
     {
-        out_ << "\"error_message\":\"not found\""sv;
+        out_ << "\"error_message\":\"not found\"}"sv;
+        return;
     }
-    else
+    out_ << "\"buses\":["sv;
+    if (!buses->empty())
     {
-        out_ << "\"buses\":["sv;
         bool is_first = true;
-        for (const auto &bus : buses)
+        for (const auto &bus : *buses)
         {
             if (!is_first)
             {
@@ -121,8 +108,8 @@ void JsonReader::ConstructJson(const std::unordered_set<entity::BusPtr> &buses, 
             out_ << "\""sv;
             is_first = false;
         }
-        out_ << "]"sv;
     }
+    out_ << "]"sv;
     out_ << "}"sv;
 }
 

@@ -17,7 +17,7 @@ namespace json
         void FillStops(const Dict &node, distances &temp_distances);
         void FillBuses(const Dict &node);
         void GetResponce(const Node &node);
-        void ConstructJson(const std::unordered_set<entity::BusPtr> &buses, int request_id);
+        void ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id);
         void ConstructJson(const std::optional<entity::BusStat> &busstat, int reqeust_id);
 
     public:
