@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <string_view>
+#include <deque>
 #include "geo.h"
 
 namespace entity
@@ -15,6 +16,7 @@ namespace entity
     struct Bus
     {
         std::string name;
+        std::deque<std::string_view> stops;
         bool operator==(const Bus &bus) const;
     };
 

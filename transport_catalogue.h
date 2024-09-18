@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <deque>
 #include <iostream>
 #include <list>
 #include <algorithm>
@@ -23,16 +22,11 @@ namespace Data
         std::list<Stop> st_;
         std::unordered_map<std::string_view, const Bus *, Bus_Hash> buses_;
         std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
-        std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> buses_at_stop_;
-        std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> stops_at_bus_;
         std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> distances_;
 
     public:
         void AddBus(std::string_view name, std::vector<std::string_view> stops);
         void AddStop(std::string_view name, Coordinates &&coordinates);
-        void AddBusesToStop();
-        const std::unordered_map<std::string_view, std::deque<const Bus *>, Stop_Hash> &GetBusesAtStop() const;
-        const std::unordered_map<std::string_view, std::deque<const Stop *>, Bus_Hash> &GetStopsAtBus() const;
         void AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>>&& distances);
         const Bus *GetBus(std::string_view bus) const;
         const Stop *GetStop(std::string_view stop) const;

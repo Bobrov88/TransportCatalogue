@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include <cassert>
 
 using namespace json;
 
@@ -6,8 +7,12 @@ void JsonReader::ProcessTransportCatalogue()
 {
     Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
+    try {
     FillDataBase(dict.at("base_requests"));
     GetResponce(dict.at("stat_requests"));
+    } catch (std::exception& e) {
+        std::cerr << e.what();
+    }
 }
 
 void JsonReader::FillDataBase(const Node &node)
@@ -26,7 +31,6 @@ void JsonReader::FillDataBase(const Node &node)
         if (data.at("type").AsString() == "Bus")
             FillBuses(data);
     }
-    db_.AddBusesToStop();
 }
 
 void JsonReader::FillStops(const Dict &node, distances &temp_distances)
@@ -69,15 +73,22 @@ void JsonReader::GetResponce(const Node &node)
             out_ << ","sv;
         }
         const auto &stat = req.AsMap();
-        if (stat.at("type").AsString() == "Stop")
+        try
         {
-            const auto stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
-            ConstructJson(stop_responce, stat.at("id").AsInt());
+            if (stat.at("type").AsString() == "Stop")
+            {
+                const auto stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
+                ConstructJson(stop_responce, stat.at("id").AsInt());
+            }
+            else /*if (stat.at("type").AsString() == "Bus")*/
+            {
+                const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
+                ConstructJson(bus_responce, stat.at("id").AsInt());
+            }
         }
-        else /*if (stat.at("type").AsString() == "Bus")*/
+        catch (std::exception &e)
         {
-            const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
-            ConstructJson(bus_responce, stat.at("id").AsInt());
+            std::cerr << e.what();
         }
         is_first = false;
     }

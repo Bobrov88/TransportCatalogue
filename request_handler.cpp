@@ -21,13 +21,15 @@ const std::optional<std::unordered_set<BusPtr>> RequestHandler::GetBusesByStop(c
         return std::nullopt;
     }
     std::unordered_set<BusPtr> buses;
-    if (db_.GetBusesAtStop().count(stop_name))
-    {
-        const auto &busesAtStop = db_.GetBusesAtStop().at(stop_name);
-        for (const auto &el : busesAtStop)
-        {
-            buses.insert(el->name);
-        }
-    }
+    const auto begin = db_.GetBuses().cbegin();
+    const auto end = db_.GetBuses().cend();
+    for_each(begin, end,
+             [&buses, &stop_name](const auto &bus)
+             {
+                 const auto &stops_ref = bus.second->stops;
+                 if (std::find(stops_ref.cbegin(),
+                               stops_ref.cend(), stop_name) != stops_ref.cend())
+                     buses.insert(bus.first);
+             });
     return buses;
 }
