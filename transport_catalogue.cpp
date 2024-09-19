@@ -7,10 +7,10 @@ void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_v
 {
     Bus bus;
     bus.name = name;
-    auto &ref = b_.emplace_back(std::move(bus));
-    buses_[ref.name] = &ref;
     for (const auto &stop : stops)
         bus.stops.push_back(stops_.at(stop)->name);
+    auto &ref = b_.emplace_back(std::move(bus));
+    buses_[ref.name] = &ref;
 }
 
 void TransportCatalogue::AddStop(std::string_view name, Coordinates &&coordinates)
