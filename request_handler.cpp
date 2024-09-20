@@ -9,8 +9,9 @@ std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_na
     BusStat busstat;
     busstat.stop_count_ = db_.GetStopCount(bus_name);
     busstat.unique_stop_count_ = db_.GetUniqueStopCount(bus_name);
-    busstat.route_length_ = static_cast<int>(db_.GetRouteLength(bus_name));
-    busstat.curvature_ = static_cast<double>(db_.GetRealRouteLength(bus_name)) / busstat.route_length_;
+    int real_route = db_.GetRealRouteLength(bus_name);
+    busstat.route_length_ = real_route;
+    busstat.curvature_ = static_cast<double>(real_route) / db_.GetRouteLength(bus_name);
     return busstat;
 }
 

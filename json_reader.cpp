@@ -123,7 +123,7 @@ void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, in
     else
     {
         out_ << "\"curvature\":"sv << busstat->curvature_ << ","sv;
-        out_ << "\"route_length\":"sv << static_cast<int>(busstat->route_length_ * busstat->curvature_) << ","sv;
+        out_ << "\"route_length\":"sv << busstat->route_length_ << ","sv;
         out_ << "\"stop_count\":"sv << busstat->stop_count_ << ","sv;
         out_ << "\"unique_stop_count\":"sv << busstat->unique_stop_count_;
     }
