@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include <set>
 
 using namespace json;
 
@@ -96,7 +97,8 @@ void JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::Bu
     if (!buses->empty())
     {
         bool is_first = true;
-        for (const auto &bus : *buses)
+        std::set<entity::BusPtr> tmp_buses {buses->begin(), buses->end()};
+        for (const auto &bus : tmp_buses)
         {
             if (!is_first)
             {
