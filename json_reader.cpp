@@ -9,6 +9,7 @@ void JsonReader::ProcessTransportCatalogue()
     const auto &dict = doc.GetRoot().AsMap();
     FillDataBase(dict.at("base_requests"));
     GetResponce(dict.at("stat_requests"));
+    GetRenderSettings(dict.at("render_settings"));
 }
 
 void JsonReader::FillDataBase(const Node &node)
@@ -84,6 +85,29 @@ void JsonReader::GetResponce(const Node &node)
     out_ << "]"sv;
 }
 
+void JsonReader::GetRenderSettings(const Node &node)
+{
+    const auto &settings = node.AsMap();
+    renderer_.setWidth(settings.at("width").AsDouble());
+    renderer_.setHeight(settings.at("height").AsDouble());
+    renderer_.setPadding(settings.at("padding").AsDouble());
+    renderer_.setLineWidth(settings.at("line_width").AsDouble());
+    renderer_.setStopRadius(settings.at("stop_radius").AsDouble());
+    renderer_.setBusLabelFontSize(settings.at("bus_label_font").AsInt());
+    renderer_.setBusLabelOffset(GetPointFromArray(settings.at("bus_label_offset").AsArray()));
+    renderer_.setStopLabelFontSize(settings.at("stop_label_font_size").AsInt());
+    renderer_.setStopLabelOffset(GetPointFromArray(settings.at("stop_label_offset").AsArray()));
+
+    const auto &underlayerColor = settings.at("underlayer_color");
+    if (underlayerColor.IsString())
+        renderer_.setUnderlayerColor(svg::Color{underlayerColor.AsString()});
+    else
+        renderer_.setUnderlayerColor(GetColorFromArray(underlayerColor));
+
+    renderer_.setUnderlayerWidth(settings.at("underlayer_width").AsDouble());
+    renderer_.setColorPalette(std::move(GetPaletteFromArray(settings.at("color_palette"))));
+}
+
 void JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id)
 {
     using namespace std::string_view_literals;
@@ -97,7 +121,7 @@ void JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::Bu
     if (!buses->empty())
     {
         bool is_first = true;
-        std::set<entity::BusPtr> tmp_buses {buses->begin(), buses->end()};
+        std::set<entity::BusPtr> tmp_buses{buses->begin(), buses->end()};
         for (const auto &bus : tmp_buses)
         {
             if (!is_first)
@@ -130,4 +154,41 @@ void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, in
         out_ << "\"unique_stop_count\":"sv << busstat->unique_stop_count_;
     }
     out_ << "}"sv;
+}
+
+namespace json
+{
+    svg::Color GetColorFromArray(const Node &node)
+    {
+        const auto &array = node.AsArray();
+        if (array.size() == 3)
+            return svg::Rgb{static_cast<uint8_t>(array[0].AsInt()),
+                            static_cast<uint8_t>(array[1].AsInt()),
+                            static_cast<uint8_t>(array[2].AsInt())};
+        if (array.size() == 4)
+            return svg::Rgba{static_cast<uint8_t>(array[0].AsInt()),
+                             static_cast<uint8_t>(array[1].AsInt()),
+                             static_cast<uint8_t>(array[2].AsInt()),
+                             array[3].AsDouble()};
+        return svg::NoneColor;
+    }
+
+    svg::Point GetPointFromArray(const Node &node)
+    {
+        return svg::Point{node.AsArray()[0].AsDouble(), node.AsArray()[1].AsDouble()};
+    }
+
+    std::queue<svg::Color> GetPaletteFromArray(const Node &node)
+    {
+        const auto &color_palette = node.AsArray();
+        std::queue<svg::Color> palette;
+        for (const auto &color : color_palette)
+        {
+            if (color.IsString())
+                palette.push(color.AsString());
+            else
+                palette.push(GetColorFromArray(color));
+        }
+        return palette;
+    }
 }

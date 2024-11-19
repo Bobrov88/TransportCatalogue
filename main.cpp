@@ -9,12 +9,13 @@
 using namespace std;
 using namespace Data;
 using namespace json;
-using namespace renderer;
+using namespace Renderer;
 
 int main()
 {
     TransportCatalogue db;
-    RequestHandler handler(db, MapRenderer{});
-    JsonReader reader(db, std::cin, handler, std::cout);
+    MapRenderer renderer;
+    RequestHandler handler(db, renderer);
+    JsonReader reader(db, std::cin, handler, std::cout, renderer);
     reader.ProcessTransportCatalogue();
 }

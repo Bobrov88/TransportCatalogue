@@ -13,7 +13,7 @@ class RequestHandler
 {
 public:
     // MapRenderer понадобится в следующей части итогового проекта
-    RequestHandler(const TransportCatalogue &db, const renderer::MapRenderer &renderer) : db_(db), renderer_(renderer) {}
+    RequestHandler(const TransportCatalogue &db, const Renderer::MapRenderer &renderer) : db_(db), renderer_(renderer) {}
 
     // Возвращает информацию о маршруте (запрос Bus)
     std::optional<BusStat> GetBusStat(const std::string_view &bus_name) const;
@@ -26,5 +26,5 @@ public:
 
 private:
     const TransportCatalogue &db_;
-    const renderer::MapRenderer &renderer_;
+    const Renderer::MapRenderer &renderer_;
 };
