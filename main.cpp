@@ -16,6 +16,8 @@ int main()
     TransportCatalogue db;
     MapRenderer renderer;
     RequestHandler handler(db, renderer);
-    JsonReader reader(db, std::cin, handler, std::cout, renderer);
+    JsonReader reader(db, handler, renderer, std::cin, std::cout);
     reader.ProcessTransportCatalogue();
+    svg::Document doc = handler.RenderMap();
+    doc.Render(std::cout);
 }

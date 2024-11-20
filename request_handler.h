@@ -22,7 +22,7 @@ public:
     const std::optional<std::unordered_set<BusPtr>> GetBusesByStop(const std::string_view &stop_name) const;
 
     // Этот метод будет нужен в следующей части итогового проекта
-    // svg::Document RenderMap() const;
+    svg::Document RenderMap() const;
 
 private:
     const TransportCatalogue &db_;

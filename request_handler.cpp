@@ -34,3 +34,20 @@ const std::optional<std::unordered_set<BusPtr>> RequestHandler::GetBusesByStop(c
              });
     return buses;
 }
+
+svg::Document RequestHandler::RenderMap() const
+{
+    const auto &buses = db_.GetBuses();
+    const std::map<std::string_view, const entity::Bus *> sorted_buses{buses.cbegin(), buses.cend()};
+    svg::Document doc;
+    for (const auto &bus : sorted_buses)
+    {
+        const auto &stops = bus.second->stops;
+        std::vector<geo::Coordinates> coordinates;
+        coordinates.reserve(stops.size());
+        for_each(stops.begin(), stops.end(), [&coordinates, this](const auto &stop)
+                 { coordinates.push_back(this->db_.GetStop(stop)->coordinates); });
+        doc.Add(renderer_.CreatePolyline(coordinates));
+    }
+    return doc;
+}

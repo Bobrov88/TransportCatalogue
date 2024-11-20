@@ -8,7 +8,7 @@ void JsonReader::ProcessTransportCatalogue()
     Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
     FillDataBase(dict.at("base_requests"));
-    GetResponce(dict.at("stat_requests"));
+ //   GetResponce(dict.at("stat_requests"));
     GetRenderSettings(dict.at("render_settings"));
 }
 
@@ -93,7 +93,7 @@ void JsonReader::GetRenderSettings(const Node &node)
     renderer_.setPadding(settings.at("padding").AsDouble());
     renderer_.setLineWidth(settings.at("line_width").AsDouble());
     renderer_.setStopRadius(settings.at("stop_radius").AsDouble());
-    renderer_.setBusLabelFontSize(settings.at("bus_label_font").AsInt());
+    renderer_.setBusLabelFontSize(settings.at("bus_label_font_size").AsInt());
     renderer_.setBusLabelOffset(GetPointFromArray(settings.at("bus_label_offset").AsArray()));
     renderer_.setStopLabelFontSize(settings.at("stop_label_font_size").AsInt());
     renderer_.setStopLabelOffset(GetPointFromArray(settings.at("stop_label_offset").AsArray()));
@@ -178,16 +178,16 @@ namespace json
         return svg::Point{node.AsArray()[0].AsDouble(), node.AsArray()[1].AsDouble()};
     }
 
-    std::queue<svg::Color> GetPaletteFromArray(const Node &node)
+    std::vector<svg::Color> GetPaletteFromArray(const Node &node)
     {
         const auto &color_palette = node.AsArray();
-        std::queue<svg::Color> palette;
+        std::vector<svg::Color> palette;
         for (const auto &color : color_palette)
         {
             if (color.IsString())
-                palette.push(color.AsString());
+                palette.push_back(color.AsString());
             else
-                palette.push(GetColorFromArray(color));
+                palette.push_back(GetColorFromArray(color));
         }
         return palette;
     }
