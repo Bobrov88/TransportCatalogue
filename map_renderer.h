@@ -102,7 +102,8 @@ namespace Renderer
         svg::Point stop_label_offset_ = {0.0, 0.0};
         svg::Color underlayer_color_ = svg::NoneColor;
         double underlayer_width_ = 0.0;
-        std::vector<svg::Color> color_palette;
+        std::vector<svg::Color> color_palette_;
+        mutable size_t color_palette_order_ = 0;
 
     public:
         MapRenderer() = default;
@@ -118,7 +119,7 @@ namespace Renderer
         svg::Point getStopLabelOffset() const { return stop_label_offset_; }
         svg::Color getUnderlayerColor() const { return underlayer_color_; }
         double getUnderlayerWidth() const { return underlayer_width_; }
-        const std::vector<svg::Color> &getColorPalette() const { return color_palette; }
+        const std::vector<svg::Color> &getColorPalette() const { return color_palette_; }
 
         void setWidth(double width) { width_ = width; }
         void setHeight(double height) { height_ = height; }
@@ -131,10 +132,10 @@ namespace Renderer
         void setStopLabelOffset(const svg::Point &offset) { stop_label_offset_ = offset; }
         void setUnderlayerColor(const svg::Color &color) { underlayer_color_ = color; }
         void setUnderlayerWidth(double width) { underlayer_width_ = width; }
-        void setColorPalette(const std::vector<svg::Color> &palette) { color_palette = palette; }
+        void setColorPalette(const std::vector<svg::Color> &palette) { color_palette_ = palette; }
 
         const svg::Polyline CreatePolyline(const std::vector<geo::Coordinates> &points) const;
-        svg::Text CreateText(const std::string_view text);
-        //svg::Circle CreateCircle();
+        // svg::Text CreateText(const std::string_view text);
+        // svg::Circle CreateCircle();
     };
 }

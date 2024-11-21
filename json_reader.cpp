@@ -8,7 +8,7 @@ void JsonReader::ProcessTransportCatalogue()
     Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
     FillDataBase(dict.at("base_requests"));
- //   GetResponce(dict.at("stat_requests"));
+  //  GetResponce(dict.at("stat_requests"));
     GetRenderSettings(dict.at("render_settings"));
 }
 
@@ -75,10 +75,13 @@ void JsonReader::GetResponce(const Node &node)
             const auto stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
             ConstructJson(stop_responce, stat.at("id").AsInt());
         }
-        else /*if (stat.at("type").AsString() == "Bus")*/
+        else if (stat.at("type").AsString() == "Bus")
         {
             const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
             ConstructJson(bus_responce, stat.at("id").AsInt());
+        } else { // stat.at("type").AsString() == "Map"
+            const auto map_responce = rh_.RenderMap();
+          //  ConstructJson(map_responce, stat.at("id").AsInt());
         }
         is_first = false;
     }
@@ -155,6 +158,10 @@ void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, in
     }
     out_ << "}"sv;
 }
+
+// void JsonReader::ConstructJson(const svg::Document& document, int request_id) {
+//     document.Render(out_);
+// }
 
 namespace json
 {

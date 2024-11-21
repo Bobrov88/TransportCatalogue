@@ -47,6 +47,7 @@ svg::Document RequestHandler::RenderMap() const
         coordinates.reserve(stops.size());
         for_each(stops.begin(), stops.end(), [&coordinates, this](const auto &stop)
                  { coordinates.push_back(this->db_.GetStop(stop)->coordinates); });
+
         doc.Add(renderer_.CreatePolyline(coordinates));
     }
     return doc;

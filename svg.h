@@ -57,8 +57,8 @@ namespace svg
             : x(x), y(y)
         {
         }
-        double x = 0;
-        double y = 0;
+        double x = 0.0;
+        double y = 0.0;
     };
 
     struct Rgb
