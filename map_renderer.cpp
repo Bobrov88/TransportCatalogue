@@ -5,10 +5,9 @@ namespace Renderer
     const svg::Polyline MapRenderer::CreatePolyline(const std::vector<geo::Coordinates> &points) const
     {
         svg::Polyline polyline;
+
         if (!points.empty())
         {
-            const MapRenderer::SphereProjector projector(points.begin(), points.end(), width_, height_, padding_);
-
             for (const auto &point : points)
             {
                 const svg::Point screen_coord = projector(point);
@@ -22,4 +21,8 @@ namespace Renderer
         }
         return polyline;
     }
+
+     void MapRenderer::InitProjector(std::vector<geo::Coordinates>&& points) {
+        projector = std::move(SphereProjector{points.begin(), points.end(), width_, height_, padding_});
+     }
 }

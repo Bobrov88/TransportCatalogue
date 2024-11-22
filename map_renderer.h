@@ -16,6 +16,7 @@ namespace Renderer
         class SphereProjector
         {
         public:
+            SphereProjector() = default;
             // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
             template <typename PointInputIt>
             SphereProjector(PointInputIt points_begin, PointInputIt points_end,
@@ -104,6 +105,7 @@ namespace Renderer
         double underlayer_width_ = 0.0;
         std::vector<svg::Color> color_palette_;
         mutable size_t color_palette_order_ = 0;
+        MapRenderer::SphereProjector projector;
 
     public:
         MapRenderer() = default;
@@ -135,6 +137,7 @@ namespace Renderer
         void setColorPalette(const std::vector<svg::Color> &palette) { color_palette_ = palette; }
 
         const svg::Polyline CreatePolyline(const std::vector<geo::Coordinates> &points) const;
+        void InitProjector(std::vector<geo::Coordinates> &&points);
         // svg::Text CreateText(const std::string_view text);
         // svg::Circle CreateCircle();
     };

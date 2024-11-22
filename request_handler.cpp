@@ -40,6 +40,7 @@ svg::Document RequestHandler::RenderMap() const
     const auto &buses = db_.GetBuses();
     const std::map<std::string_view, const entity::Bus *> sorted_buses{buses.cbegin(), buses.cend()};
     svg::Document doc;
+
     for (const auto &bus : sorted_buses)
     {
         const auto &stops = bus.second->stops;

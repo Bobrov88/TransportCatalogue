@@ -109,6 +109,14 @@ void JsonReader::GetRenderSettings(const Node &node)
 
     renderer_.setUnderlayerWidth(settings.at("underlayer_width").AsDouble());
     renderer_.setColorPalette(std::move(GetPaletteFromArray(settings.at("color_palette"))));
+
+    const auto& stops = db_.GetStops();
+    std::vector<geo::Coordinates> coordinates;
+    coordinates.reserve(stops.size());
+    for_each(stops.begin(), stops.end(), [&](const auto& stop) {
+        coordinates.push_back(stop.second->coordinates);
+    });
+    renderer_.InitProjector(std::move(coordinates));
 }
 
 void JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id)
