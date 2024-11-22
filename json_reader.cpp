@@ -8,7 +8,7 @@ void JsonReader::ProcessTransportCatalogue()
     Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
     FillDataBase(dict.at("base_requests"));
-  //  GetResponce(dict.at("stat_requests"));
+ //   GetResponce(dict.at("stat_requests"));
     GetRenderSettings(dict.at("render_settings"));
 }
 
@@ -114,6 +114,7 @@ void JsonReader::GetRenderSettings(const Node &node)
     std::vector<geo::Coordinates> coordinates;
     coordinates.reserve(stops.size());
     for_each(stops.begin(), stops.end(), [&](const auto& stop) {
+        if (stop.second->is_in_route)
         coordinates.push_back(stop.second->coordinates);
     });
     renderer_.InitProjector(std::move(coordinates));

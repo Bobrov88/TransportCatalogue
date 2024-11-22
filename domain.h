@@ -11,6 +11,7 @@ namespace entity
         std::string name;
         geo::Coordinates coordinates;
         bool operator==(const Stop &stop) const;
+        mutable bool is_in_route = false;
     };
 
     struct Bus

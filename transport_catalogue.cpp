@@ -8,7 +8,10 @@ void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_v
     Bus bus;
     bus.name = name;
     for (const auto &stop : stops)
+    {
         bus.stops.push_back(stops_.at(stop)->name);
+        stops_.at(stop)->is_in_route = true;
+    }
     auto &ref = b_.emplace_back(std::move(bus));
     buses_[ref.name] = &ref;
 }
