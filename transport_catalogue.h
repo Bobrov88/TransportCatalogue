@@ -25,7 +25,7 @@ namespace Data
         std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> distances_;
 
     public:
-        void AddBus(std::string_view name, std::vector<std::string_view> stops);
+        void AddBus(std::string_view name, std::vector<std::string_view> stops, bool is_round_trip);
         void AddStop(std::string_view name, Coordinates &&coordinates);
         void AddDistances(std::unordered_map<std::string_view, std::map<std::string, int>>&& distances);
         const Bus *GetBus(std::string_view bus) const;

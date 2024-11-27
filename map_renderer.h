@@ -104,7 +104,6 @@ namespace Renderer
         svg::Color underlayer_color_ = svg::NoneColor;
         double underlayer_width_ = 0.0;
         std::vector<svg::Color> color_palette_;
-        mutable size_t color_palette_order_ = 0;
         MapRenderer::SphereProjector projector;
 
     public:
@@ -136,9 +135,12 @@ namespace Renderer
         void setUnderlayerWidth(double width) { underlayer_width_ = width; }
         void setColorPalette(const std::vector<svg::Color> &palette) { color_palette_ = palette; }
 
-        const svg::Polyline CreatePolyline(const std::vector<geo::Coordinates> &points) const;
+        const svg::Polyline CreatePolyline(const std::vector<geo::Coordinates> &points, size_t color_pallete_order) const;
+        const svg::Text CreateBusName(const std::string &route_name, const geo::Coordinates coordinates, size_t color_pallete_order) const;
+        const svg::Text CreateStrokeUnderBusName(const std::string &route_name, const geo::Coordinates coordinates) const;
+        const svg::Circle CreateCircle(const geo::Coordinates coordinates) const;
+        const svg::Text CreateStopName(const std::string &route_name, const geo::Coordinates coordinates) const;
+        const svg::Text CreateStrokeUnderStopName(const std::string &route_name, const geo::Coordinates coordinates) const;
         void InitProjector(std::vector<geo::Coordinates> &&points);
-        // svg::Text CreateText(const std::string_view text);
-        // svg::Circle CreateCircle();
     };
 }

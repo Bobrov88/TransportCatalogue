@@ -50,12 +50,7 @@ void JsonReader::FillBuses(const Dict &node)
     stops.reserve(stop_array.size() * 2);
     std::for_each(stop_array.cbegin(), stop_array.cend(), [&stops](const auto &el)
                   { stops.push_back(el.AsString()); });
-    if (!node.at("is_roundtrip").AsBool())
-    {
-        std::for_each(std::next(stop_array.crbegin()), stop_array.crend(), [&stops](const auto &el)
-                      { stops.push_back(el.AsString()); });
-    }
-    db_.AddBus(node.at("name").AsString(), std::move(stops));
+    db_.AddBus(node.at("name").AsString(), std::move(stops), node.at("is_roundtrip").AsBool());
 }
 
 void JsonReader::GetResponce(const Node &node)
@@ -79,9 +74,11 @@ void JsonReader::GetResponce(const Node &node)
         {
             const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
             ConstructJson(bus_responce, stat.at("id").AsInt());
-        } else { // stat.at("type").AsString() == "Map"
+        }
+        else if (stat.at("type").AsString() == "Map")
+        {
             const auto map_responce = rh_.RenderMap();
-          //  ConstructJson(map_responce, stat.at("id").AsInt());
+            ConstructJson(map_responce, stat.at("id").AsInt());
         }
         is_first = false;
     }
@@ -110,13 +107,13 @@ void JsonReader::GetRenderSettings(const Node &node)
     renderer_.setUnderlayerWidth(settings.at("underlayer_width").AsDouble());
     renderer_.setColorPalette(std::move(GetPaletteFromArray(settings.at("color_palette"))));
 
-    const auto& stops = db_.GetStops();
+    const auto &stops = db_.GetStops();
     std::vector<geo::Coordinates> coordinates;
     coordinates.reserve(stops.size());
-    for_each(stops.begin(), stops.end(), [&](const auto& stop) {
+    for_each(stops.begin(), stops.end(), [&](const auto &stop)
+             {
         if (stop.second->is_in_route)
-        coordinates.push_back(stop.second->coordinates);
-    });
+        coordinates.push_back(stop.second->coordinates); });
     renderer_.InitProjector(std::move(coordinates));
 }
 
@@ -168,9 +165,10 @@ void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, in
     out_ << "}"sv;
 }
 
-// void JsonReader::ConstructJson(const svg::Document& document, int request_id) {
-//     document.Render(out_);
-// }
+ void JsonReader::ConstructJson(const svg::Document& document, int request_id) {
+     document.Render(out_);
+     request_id = 0;
+ }
 
 namespace json
 {

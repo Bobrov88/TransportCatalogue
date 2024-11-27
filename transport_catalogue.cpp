@@ -3,10 +3,11 @@
 
 using namespace Data;
 
-void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_view> stops)
+void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_view> stops, bool is_round_trip)
 {
     Bus bus;
     bus.name = name;
+    bus.is_round_trip = is_round_trip;
     for (const auto &stop : stops)
     {
         bus.stops.push_back(stops_.at(stop)->name);
@@ -54,12 +55,18 @@ const Stop *TransportCatalogue::GetStop(std::string_view stop) const
 
 size_t TransportCatalogue::GetStopCount(std::string_view bus) const
 {
-    return GetBus(bus)->stops.size();
+    size_t count = GetBus(bus)->stops.size();
+    if (GetBus(bus)->is_round_trip)
+        return count;
+    else
+        return count * 2 - 1;
 }
 
 size_t TransportCatalogue::GetUniqueStopCount(std::string_view bus) const
 {
     auto &stops = GetBus(bus)->stops;
+    if (!GetBus(bus)->is_round_trip)
+        return stops.size() - 1;
     std::set<std::string_view> unique_stop{stops.cbegin(), stops.cend()};
     return unique_stop.size();
 }
@@ -73,6 +80,8 @@ double TransportCatalogue::GetRouteLength(std::string_view bus) const
         route_length += ComputeDistance(stops_.at(stops[i])->coordinates,
                                         stops_.at(stops[i + 1])->coordinates);
     }
+    if (!GetBus(bus)->is_round_trip)
+        route_length *= 2;
     return route_length;
 }
 
@@ -82,6 +91,13 @@ int TransportCatalogue::GetRealRouteLength(std::string_view bus) const
     int real_route_length = 0;
     for (size_t i = 0; i < stops.size() - 1; ++i)
         real_route_length += GetDistanceBetweenStops(stops[i], stops[i + 1]);
+    if (!GetBus(bus)->is_round_trip)
+    {
+        for (size_t i = stops.size() - 1; i > 0; --i)
+        {
+            real_route_length += GetDistanceBetweenStops(stops[i], stops[i - 1]);
+        }
+    }
     return real_route_length;
 }
 

@@ -19,6 +19,7 @@ namespace entity
         std::string name;
         std::deque<std::string_view> stops;
         bool operator==(const Bus &bus) const;
+        bool is_round_trip = false;
     };
 
     struct BusStat
