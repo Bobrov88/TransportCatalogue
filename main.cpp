@@ -20,5 +20,4 @@ int main()
     reader.ProcessTransportCatalogue();
     svg::Document doc = handler.RenderMap();
     doc.Render(std::cout);
-    doc.Render(std::cerr);
 }

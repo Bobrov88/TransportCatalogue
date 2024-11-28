@@ -49,23 +49,26 @@ svg::Document RequestHandler::RenderMap() const
     for (const auto &[route_name, bus] : sorted_buses)
     {
         const auto &route_stops = bus->stops;
-        std::vector<geo::Coordinates> coordinates;
-        coordinates.reserve(route_stops.size());
-        for_each(route_stops.begin(), route_stops.end(), [&coordinates, this](const auto &stop)
-                 { coordinates.push_back(this->db_.GetStop(stop)->coordinates); });
-        if (!bus->is_round_trip)
-            for_each(std::next(route_stops.rbegin()), route_stops.rend(), [&coordinates, this](const auto &stop)
-                     { coordinates.push_back(this->db_.GetStop(stop)->coordinates); });
-
-        polylines.push_back(std::move(renderer_.CreatePolyline(coordinates, color_pallete_order)));
-        bus_names.push_back(std::move(renderer_.CreateStrokeUnderBusName(std::string(route_name), db_.GetStop(bus->stops.front())->coordinates)));
-        bus_names.push_back(std::move(renderer_.CreateBusName(std::string(route_name), db_.GetStop(bus->stops.front())->coordinates, color_pallete_order)));
-        if (!bus->is_round_trip)
+        if (route_stops.size() != 0)
         {
-            bus_names.push_back(std::move(renderer_.CreateStrokeUnderBusName(std::string(route_name), db_.GetStop(bus->stops.back())->coordinates)));
-            bus_names.push_back(std::move(renderer_.CreateBusName(std::string(route_name), db_.GetStop(bus->stops.back())->coordinates, color_pallete_order)));
+            std::vector<geo::Coordinates> coordinates;
+            coordinates.reserve(route_stops.size());
+            for_each(route_stops.begin(), route_stops.end(), [&coordinates, this](const auto &stop)
+                     { coordinates.push_back(this->db_.GetStop(stop)->coordinates); });
+            if (!bus->is_round_trip)
+                for_each(std::next(route_stops.rbegin()), route_stops.rend(), [&coordinates, this](const auto &stop)
+                         { coordinates.push_back(this->db_.GetStop(stop)->coordinates); });
+
+            polylines.push_back(std::move(renderer_.CreatePolyline(coordinates, color_pallete_order)));
+            bus_names.push_back(std::move(renderer_.CreateStrokeUnderBusName(std::string(route_name), db_.GetStop(bus->stops.front())->coordinates)));
+            bus_names.push_back(std::move(renderer_.CreateBusName(std::string(route_name), db_.GetStop(bus->stops.front())->coordinates, color_pallete_order)));
+            if (!bus->is_round_trip && bus->stops.front() != bus->stops.back())
+            {
+                bus_names.push_back(std::move(renderer_.CreateStrokeUnderBusName(std::string(route_name), db_.GetStop(bus->stops.back())->coordinates)));
+                bus_names.push_back(std::move(renderer_.CreateBusName(std::string(route_name), db_.GetStop(bus->stops.back())->coordinates, color_pallete_order)));
+            }
+            ++color_pallete_order;
         }
-        ++color_pallete_order;
     }
     for (const auto &[stop_name, stop] : sorted_stop)
     {

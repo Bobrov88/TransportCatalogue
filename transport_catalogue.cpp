@@ -81,7 +81,7 @@ double TransportCatalogue::GetRouteLength(std::string_view bus) const
                                         stops_.at(stops[i + 1])->coordinates);
     }
     if (!GetBus(bus)->is_round_trip)
-        route_length *= 2;
+        route_length *= 2.0;
     return route_length;
 }
 
