@@ -8,8 +8,8 @@ void JsonReader::ProcessTransportCatalogue()
     Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
     FillDataBase(dict.at("base_requests"));
- //   GetResponce(dict.at("stat_requests"));
     GetRenderSettings(dict.at("render_settings"));
+    GetResponce(dict.at("stat_requests"));
 }
 
 void JsonReader::FillDataBase(const Node &node)
@@ -165,10 +165,16 @@ void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, in
     out_ << "}"sv;
 }
 
- void JsonReader::ConstructJson(const svg::Document& document, int request_id) {
-     document.Render(out_);
-     request_id = 0;
- }
+void JsonReader::ConstructJson(const svg::Document &document, int request_id)
+{
+    using namespace std::string_view_literals;
+    out_ << "{\"request_id\":"sv << request_id << ","sv;
+    out_ <<"\"map\":\"";
+    std::ostringstream oss;
+    document.Render(oss);
+    PrintEscape(oss.str(), out_);
+    out_<<"\"}";
+}
 
 namespace json
 {

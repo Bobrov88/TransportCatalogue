@@ -65,8 +65,6 @@ size_t TransportCatalogue::GetStopCount(std::string_view bus) const
 size_t TransportCatalogue::GetUniqueStopCount(std::string_view bus) const
 {
     auto &stops = GetBus(bus)->stops;
-    if (!GetBus(bus)->is_round_trip)
-        return stops.size() - 1;
     std::set<std::string_view> unique_stop{stops.cbegin(), stops.cend()};
     return unique_stop.size();
 }

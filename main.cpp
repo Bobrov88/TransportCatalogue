@@ -18,6 +18,4 @@ int main()
     RequestHandler handler(db, renderer);
     JsonReader reader(db, handler, renderer, std::cin, std::cout);
     reader.ProcessTransportCatalogue();
-    svg::Document doc = handler.RenderMap();
-    doc.Render(std::cout);
 }
