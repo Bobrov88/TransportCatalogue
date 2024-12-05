@@ -55,34 +55,31 @@ void JsonReader::FillBuses(const Dict &node)
 
 void JsonReader::GetResponce(const Node &node)
 {
-    using namespace std::string_view_literals;
-    out_ << "["sv;
-    bool is_first = true;
+    using namespace std::string_literals;
+    std::vector<json::Node> responces;
+
     for (const auto &req : node.AsArray())
     {
-        if (!is_first)
-        {
-            out_ << ","sv;
-        }
         const auto &stat = req.AsMap();
         if (stat.at("type").AsString() == "Stop")
         {
             const auto stop_responce = rh_.GetBusesByStop(stat.at("name").AsString());
-            ConstructJson(stop_responce, stat.at("id").AsInt());
+            responces.push_back(ConstructJson(stop_responce, stat.at("id").AsInt()));
         }
         else if (stat.at("type").AsString() == "Bus")
         {
             const auto bus_responce = rh_.GetBusStat(stat.at("name").AsString());
-            ConstructJson(bus_responce, stat.at("id").AsInt());
+            responces.push_back(ConstructJson(bus_responce, stat.at("id").AsInt()));
         }
         else if (stat.at("type").AsString() == "Map")
         {
             const auto map_responce = rh_.RenderMap();
-            ConstructJson(map_responce, stat.at("id").AsInt());
+            responces.push_back(ConstructJson(map_responce, stat.at("id").AsInt()));
         }
-        is_first = false;
     }
-    out_ << "]"sv;
+
+    json::Document doc(responces);
+    Print(doc, out_);
 }
 
 void JsonReader::GetRenderSettings(const Node &node)
@@ -117,63 +114,54 @@ void JsonReader::GetRenderSettings(const Node &node)
     renderer_.InitProjector(std::move(coordinates));
 }
 
-void JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id)
+json::Node JsonReader::ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id)
 {
-    using namespace std::string_view_literals;
-    out_ << "{\"request_id\":"sv << request_id << ","sv;
+    using namespace std::string_literals;
+
     if (buses == std::nullopt)
+        return json::Dict{
+            {"request_id"s, json::Node{request_id}},
+            {"error_message"s, json::Node{"not found"s}}};
+
+    std::set<entity::BusPtr> tmp_buses{buses->begin(), buses->end()};
+
+    json::Array arr;
+    for (const auto &bus : tmp_buses)
     {
-        out_ << "\"error_message\":\"not found\"}"sv;
-        return;
+        arr.push_back(json::Node(std::string(bus)));
     }
-    out_ << "\"buses\":["sv;
-    if (!buses->empty())
-    {
-        bool is_first = true;
-        std::set<entity::BusPtr> tmp_buses{buses->begin(), buses->end()};
-        for (const auto &bus : tmp_buses)
-        {
-            if (!is_first)
-            {
-                out_ << ","sv;
-            }
-            out_ << "\""sv;
-            out_ << bus;
-            out_ << "\""sv;
-            is_first = false;
-        }
-    }
-    out_ << "]"sv;
-    out_ << "}"sv;
+
+    return json::Dict{
+        {"request_id"s, json::Node{request_id}},
+        {"buses"s, arr}};
 }
 
-void JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, int request_id)
+json::Node JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, int request_id)
 {
-    using namespace std::string_view_literals;
-    out_ << "{\"request_id\":"sv << request_id << ","sv;
+    using namespace std::string_literals;
+
     if (!busstat)
-    {
-        out_ << "\"error_message\":\"not found\""sv;
-    }
-    else
-    {
-        out_ << "\"curvature\":"sv << busstat->curvature_ << ","sv;
-        out_ << "\"route_length\":"sv << busstat->route_length_ << ","sv;
-        out_ << "\"stop_count\":"sv << busstat->stop_count_ << ","sv;
-        out_ << "\"unique_stop_count\":"sv << busstat->unique_stop_count_;
-    }
-    out_ << "}"sv;
+        return json::Dict{
+            {"request_id"s, json::Node{request_id}},
+            {"error_message"s, json::Node{"not found"s}}};
+
+    return json::Dict{
+        {"request_id"s, json::Node{request_id}},
+        {"curvature"s, json::Node{busstat->curvature_}},
+        {"route_length"s, json::Node{busstat->route_length_}},
+        {"stop_count"s, json::Node{static_cast<int>(busstat->stop_count_)}},
+        {"unique_stop_count"s, json::Node{static_cast<int>(busstat->unique_stop_count_)}}};
 }
 
-void JsonReader::ConstructJson(const svg::Document &document, int request_id)
+json::Node JsonReader::ConstructJson(const svg::Document &document, int request_id)
 {
-    using namespace std::string_view_literals;
-    out_ << "{\"request_id\":"sv << request_id << ","sv;
-    out_ <<"\"map\":\"";
+    using namespace std::string_literals;
     std::ostringstream oss;
     document.Render(oss);
-    PrintEscape(oss.str(), out_);
-    out_<<"\"}";
+
+    return json::Dict{
+        {"request_id"s, json::Node{request_id}},
+        {"map"s, json::Node{oss.str()}}};
 }
 
 namespace json
