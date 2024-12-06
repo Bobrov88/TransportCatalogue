@@ -1,4 +1,5 @@
 #include "json_builder.h"
+#include <algorithm>
 
 namespace json
 {
@@ -6,108 +7,171 @@ namespace json
 
     Builder::Builder()
     {
-        call_stack_.push("Builder"s);
+        CheckCallMethod('B');
     }
 
     Builder &Builder::Value(json::Node value)
     {
-        PushStack("Value"s);
-
+        CheckCallMethod('V');
+        nodes_.emplace(std::move(value));
         return *this;
     }
 
     Builder &Builder::Key(std::string key)
     {
-        PushStack("Key"s);
-
+        CheckCallMethod('K');
+        nodes_.emplace(std::move(key));
         return *this;
     }
 
     Builder &Builder::StartDict()
     {
-        PushStack("StartDict"s);
-
+        CheckCallMethod('D');
+        nodes_.emplace(Dict{});
         return *this;
     }
 
     Builder &Builder::EndDict()
     {
-        PushStack("EndDict"s);
-
+        CheckCallMethod('d');
+        std::map<std::string, Node> tmp;
+        while (!nodes_.top().IsMap())
+        {
+            Node node = std::move(nodes_.top());
+            nodes_.pop();
+            tmp[std::move(nodes_.top().AsString())] = std::move(node);
+            nodes_.pop();
+        }
+        nodes_.pop();
+        nodes_.push(std::move(tmp));
         return *this;
     }
 
     Builder &Builder::StartArray()
     {
-        PushStack("StartArray"s);
-
+        CheckCallMethod('A');
+        nodes_.emplace(Array{});
         return *this;
     }
 
     Builder &Builder::EndArray()
     {
-        PushStack("EndArray"s);
-
+        CheckCallMethod('a');
+        std::vector<Node> tmp;
+        while (!nodes_.top().IsArray())
+        {
+            tmp.push_back(std::move(nodes_.top()));
+            nodes_.pop();
+        }
+        nodes_.pop();
+        std::reverse(tmp.begin(), tmp.end());
+        nodes_.push(std::move(tmp));
         return *this;
     }
 
     Node Builder::Build()
     {
-        PushStack("Builder"s);
-        
-        return Node();
+        CheckCallMethod('b');
+        return nodes_.top();
     }
 
-    void Builder::PushStack(std::string method)
+    void Builder::CheckCallMethod(char method)
     {
-        if (method == "Builder"s)
+        /*
+         * Обозначения:
+         * B - Builder
+         * b - build
+         * D - StartDict
+         * d - EndDict
+         * A - StartArray
+         * a - EndArray
+         * K - Key
+         * V - Value
+         */
+
+        switch (method)
         {
+        case 'B':
             if (!call_stack_.empty())
             {
-                if (call_stack_.top() != "Builder"s)
-                    throw std::logic_error("Incorrect 'Builder' call");
-                else
+                throw std::logic_error("Invalid call sequence: Builder already initiated.");
+            }
+            call_stack_.push(method);
+            break;
+
+        case 'b':
+            if (call_stack_.top() != 'B')
+            {
+                throw std::logic_error("Building incomplete object.");
+            }
+            call_stack_.pop(); // Удаляем 'B' при завершении
+            break;
+
+        case 'D':
+            if (call_stack_.empty() || (call_stack_.top() != 'B' && call_stack_.top() != 'A' && call_stack_.top() != 'K' && call_stack_.top() != 'V'))
+            {
+                throw std::logic_error("StartDict can only be called after Builder, StartArray, Key, or Value.");
+            }
+            if (!call_stack_.empty() && call_stack_.top() == 'K')
+            {
+                call_stack_.pop();
+            }
+            call_stack_.push(method);
+            break;
+
+        case 'd':
+            if (call_stack_.top() != 'D')
+            {
+                throw std::logic_error("EndDict not matched with StartDict.");
+            }
+            call_stack_.pop(); // Удаляем 'D' при завершении
+            break;
+
+        case 'A':
+            if (call_stack_.empty() || (call_stack_.top() != 'B' && call_stack_.top() != 'A' && call_stack_.top() != 'K' && call_stack_.top() != 'V'))
+            {
+                throw std::logic_error("StartArray can only be called after Builder, StartArray, Key, or Value.");
+            }
+            if (!call_stack_.empty() && call_stack_.top() == 'K')
+            {
+                call_stack_.pop();
+            }
+            call_stack_.push(method);
+            break;
+
+        case 'a':
+            if (call_stack_.top() != 'A')
+            {
+                throw std::logic_error("EndArray not matched with StartArray.");
+            }
+            call_stack_.pop(); // Удаляем 'A' при завершении
+            break;
+
+        case 'K':
+            if (call_stack_.empty() || (call_stack_.top() != 'D' && call_stack_.top() != 'V'))
+            {
+                throw std::logic_error("Key must follow StartDict or Value.");
+            }
+            call_stack_.push(method);
+            break;
+
+        case 'V':
+            if (call_stack_.empty() || (call_stack_.top() != 'K' && call_stack_.top() != 'A' && call_stack_.top() != 'B'))
+            {
+                throw std::logic_error("Value must follow Key, StartDict, StartArray or another Value.");
+            }
+            if (!call_stack_.empty() && call_stack_.top() == 'K')
+            {
+                call_stack_.pop();
+                if (call_stack_.top() == 'B')
                 {
-                    call_stack_.pop();
-                    return;
+                    throw std::logic_error("Value must follow Key, StartDict, StartArray or another Value.");
                 }
             }
-        }
-        else if (method == "Key"s)
-        {
-            if (call_stack_.top() != "StartDict"s)
-                throw std::logic_error("Incorrect 'key' call");
-        }
-        else if (method == "Value"s ||
-                 method == "StartDict"s ||
-                 method == "StartArray"s)
-        {
-            if (call_stack_.top() != "Builder"s &&
-                call_stack_.top() != "Key"s &&
-                call_stack_.top() != "Value"s)
-                throw std::logic_error("Incorrect '" + method + "' call");
+            break;
 
-            if (call_stack_.top() == "Key"s || call_stack_.top() == "Value"s)
-                call_stack_.pop();
+        default:
+            throw std::logic_error("Invalid method call.");
         }
-        else if (method == "EndDict"s)
-        {
-            if (call_stack_.top() == "Value"s)
-                call_stack_.pop();
-            if (call_stack_.top() != "StartDict"s)
-                throw std::logic_error("Incorrect '" + method + "' call");
-            call_stack_.pop();
-            return;
-        }
-        else if (method == "EndArray"s)
-        {
-            if (call_stack_.top() == "Value"s)
-                call_stack_.pop();
-            if (call_stack_.top() != "StartArray"s)
-                throw std::logic_error("Incorrect '" + method + "' call");
-            call_stack_.pop();
-            return;
-        }
-        call_stack_.push(std::move(method));
     }
 }
