@@ -6,56 +6,76 @@ namespace json
 
     Builder::Builder()
     {
-        call_stack_.push("Builder"s);
+    //    PushStack("Builder"s);
+    }
+
+    Builder::~Builder()
+    {
     }
 
     Builder &Builder::Value(json::Node value)
     {
-        PushStack("Value"s);
-
+    //    PushStack("Value"s);
+        nodes_.emplace(std::move(value));
         return *this;
     }
 
     Builder &Builder::Key(std::string key)
     {
-        PushStack("Key"s);
-
+     //   PushStack("Key"s);
+        nodes_.emplace(std::move(key));
         return *this;
     }
 
     Builder &Builder::StartDict()
     {
-        PushStack("StartDict"s);
-
+      //  PushStack("StartDict"s);
+        nodes_.emplace(Dict{});
         return *this;
     }
 
     Builder &Builder::EndDict()
     {
-        PushStack("EndDict"s);
-
+    //    PushStack("EndDict"s);
+        std::map<std::string, Node> tmp;
+        while (!nodes_.top().IsMap())
+        {
+            Node node = std::move(nodes_.top());
+            nodes_.pop();
+            tmp[std::move(nodes_.top().AsString())] = std::move(node);
+            nodes_.pop();
+        }
+        nodes_.pop();
+        nodes_.push(std::move(tmp));
         return *this;
     }
 
     Builder &Builder::StartArray()
     {
-        PushStack("StartArray"s);
-
+    //    PushStack("StartArray"s);
+        nodes_.emplace(Array{});
         return *this;
     }
 
     Builder &Builder::EndArray()
     {
-        PushStack("EndArray"s);
-
+   //     PushStack("EndArray"s);
+        std::vector<Node> tmp;
+        while (!nodes_.top().IsArray())
+        {
+            tmp.push_back(std::move(nodes_.top()));
+            nodes_.pop();
+        }
+        nodes_.pop();
+        std::reverse(tmp.begin(), tmp.end());
+        nodes_.push(std::move(tmp));
         return *this;
     }
 
     Node Builder::Build()
     {
-        PushStack("Builder"s);
-        
-        return Node();
+     //   PushStack("Builder"s);
+        return nodes_.top();
     }
 
     void Builder::PushStack(std::string method)

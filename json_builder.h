@@ -1,7 +1,6 @@
 #pragma once
 #include "json.h"
 #include <stack>
-#include <functional>
 
 namespace json
 {
@@ -9,8 +8,9 @@ namespace json
     {
     public:
         Builder();
+        ~Builder();
 
-        Builder &Value(json::Node value);
+        Builder &Value(Node value);
         Builder &Key(std::string key);
         Builder &StartDict();
         Builder &EndDict();
@@ -22,8 +22,8 @@ namespace json
         void PushStack(std::string method);
 
     private:
+        std::stack<Node> nodes_;
         std::stack<std::string> call_stack_;
-        Node root_;
     };
 
 }
