@@ -8,6 +8,7 @@ namespace json
     {
     public:
         Builder();
+        ~Builder();
         Builder &Value(Node value);
         Builder &Key(std::string key);
         Builder &StartDict();

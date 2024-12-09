@@ -10,6 +10,18 @@ namespace json
         CheckCallMethod('B');
     }
 
+    Builder::~Builder()
+    {
+        while (!call_stack_.empty())
+        {
+            call_stack_.pop();
+        }
+        while (!nodes_.empty())
+        {
+            nodes_.pop();
+        }
+    }
+
     Builder &Builder::Value(json::Node value)
     {
         CheckCallMethod('V');
@@ -100,7 +112,7 @@ namespace json
             break;
 
         case 'b':
-            if (call_stack_.top() != 'B')
+            if ((call_stack_.top() != 'B' && call_stack_.top() != 'X')|| nodes_.empty())
             {
                 throw std::logic_error("Building incomplete object.");
             }
@@ -156,6 +168,10 @@ namespace json
             break;
 
         case 'V':
+            if (call_stack_.top() == 'X')
+            {
+                throw std::logic_error("Incorrect value call");
+            }
             if (call_stack_.empty() || (call_stack_.top() != 'K' && call_stack_.top() != 'A' && call_stack_.top() != 'B'))
             {
                 throw std::logic_error("Value must follow Key, StartDict, StartArray or another Value.");
@@ -163,10 +179,10 @@ namespace json
             if (!call_stack_.empty() && call_stack_.top() == 'K')
             {
                 call_stack_.pop();
-                if (call_stack_.top() == 'B')
-                {
-                    throw std::logic_error("Value must follow Key, StartDict, StartArray or another Value.");
-                }
+            }
+            if (call_stack_.top() == 'B')
+            {
+                call_stack_.push('X');
             }
             break;
 

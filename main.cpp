@@ -71,4 +71,17 @@ int main()
     {
         std::cout << "2 " << e.what() << endl;
     }
+    try
+    {
+        json::Print(
+            json::Document{
+                json::Builder{}
+                    .Build()},
+            cout);
+        cout << endl;
+    }
+    catch (std::exception &e)
+    {
+        std::cout << "3 " << e.what() << endl;
+    }
 }
