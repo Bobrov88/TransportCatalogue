@@ -5,11 +5,6 @@ namespace json
 {
     using namespace std::string_literals;
 
-    Builder::Builder()
-    {
-        CheckCallMethod('B');
-    }
-
     Builder::~Builder()
     {
         while (!call_stack_.empty())
@@ -22,28 +17,25 @@ namespace json
         }
     }
 
-    Builder &Builder::Value(json::Node value)
+    void Builder::ValueInternal(Node value)
     {
         CheckCallMethod('V');
         nodes_.emplace(std::move(value));
-        return *this;
     }
 
-    Builder &Builder::Key(std::string key)
+    void Builder::KeyInternal(std::string key)
     {
         CheckCallMethod('K');
         nodes_.emplace(std::move(key));
-        return *this;
     }
 
-    Builder &Builder::StartDict()
+    void Builder::StartDictInternal()
     {
         CheckCallMethod('D');
         nodes_.emplace(Dict{});
-        return *this;
     }
 
-    Builder &Builder::EndDict()
+    void Builder::EndDictInternal()
     {
         CheckCallMethod('d');
         std::map<std::string, Node> tmp;
@@ -56,17 +48,15 @@ namespace json
         }
         nodes_.pop();
         nodes_.push(std::move(tmp));
-        return *this;
     }
 
-    Builder &Builder::StartArray()
+    void Builder::StartArrayInternal()
     {
         CheckCallMethod('A');
         nodes_.emplace(Array{});
-        return *this;
     }
 
-    Builder &Builder::EndArray()
+    void Builder::EndArrayInternal()
     {
         CheckCallMethod('a');
         std::vector<Node> tmp;
@@ -78,13 +68,6 @@ namespace json
         nodes_.pop();
         std::reverse(tmp.begin(), tmp.end());
         nodes_.push(std::move(tmp));
-        return *this;
-    }
-
-    Node Builder::Build()
-    {
-        CheckCallMethod('b');
-        return nodes_.top();
     }
 
     void Builder::CheckCallMethod(char method)
@@ -112,7 +95,7 @@ namespace json
             break;
 
         case 'b':
-            if ((call_stack_.top() != 'B' && call_stack_.top() != 'X')|| nodes_.empty())
+            if ((call_stack_.top() != 'B' && call_stack_.top() != 'X') || nodes_.empty())
             {
                 throw std::logic_error("Building incomplete object.");
             }
