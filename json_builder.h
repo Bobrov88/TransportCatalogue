@@ -4,10 +4,22 @@
 
 namespace json
 {
-    class BaseMethods;
-
-    class Builder final : public BaseMethods
+    class Builder
     {
+    public:
+        Builder();
+        Builder &Value(Node value);
+        Builder &Key(std::string key);
+        Builder &StartDict();
+        Builder &EndDict();
+        Builder &StartArray();
+        Builder &EndArray();
+
+        json::Node Build();
+
+        void CheckCallMethod(char method);
+
+    private:
         std::stack<Node> nodes_;
         std::stack<char> call_stack_;
         void CheckCallMethod(char method);
