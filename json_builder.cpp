@@ -10,7 +10,35 @@ namespace json
         CheckCallMethod('B');
     }
 
-    void Builder::ValueInternal(Node value)
+    Builder::~Builder()
+    {
+        while (!call_stack_.empty())
+        {
+            call_stack_.pop();
+        }
+        while (!nodes_.empty())
+        {
+            nodes_.pop();
+        }
+    }
+
+    Builder::FinalContext Builder::Value(Node value)
+    {
+        this->ValueInternal(value);
+        return FinalContext(*this);
+    }
+    Builder::DictContext Builder::StartDict()
+    {
+        this->StartDictInternal();
+        return DictContext(*this);
+    }
+    Builder::ArrayContext Builder::StartArray()
+    {
+        this->StartArrayInternal();
+        return ArrayContext(*this);
+    }
+
+    void Builder::ValueInternal(json::Node value)
     {
         CheckCallMethod('V');
         nodes_.emplace(std::move(value));
@@ -63,7 +91,7 @@ namespace json
         nodes_.push(std::move(tmp));
     }
 
-    void Builder::CheckCallMethod(char method)
+    void Builder::CheckCallMethod(char method) const
     {
         /*
          * Обозначения:
@@ -88,7 +116,7 @@ namespace json
             break;
 
         case 'b':
-            if (call_stack_.top() != 'B')
+            if ((call_stack_.top() != 'B' && call_stack_.top() != 'X') || nodes_.empty())
             {
                 throw std::logic_error("Building incomplete object.");
             }
