@@ -91,6 +91,12 @@ namespace json
         nodes_.push(std::move(tmp));
     }
 
+    const Node &Builder::GetRoot() const
+    {
+        CheckCallMethod('b');
+        return nodes_.top();
+    }
+
     void Builder::CheckCallMethod(char method) const
     {
         /*

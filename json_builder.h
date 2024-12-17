@@ -10,22 +10,42 @@ namespace json
         class KeyContext;
         class ArrayContext;
         class DictContext;
+        class FinalContext;
+
+    public:
+        Builder();
+        ~Builder();
+        FinalContext Value(Node value);
+        DictContext StartDict();
+        ArrayContext StartArray();
+        void KeyInternal(std::string key);
+        void ValueInternal(Node value);
+        void StartDictInternal();
+        void StartArrayInternal();
+        void EndDictInternal();
+        void EndArrayInternal();
+        const Node &GetRoot() const;
+
+    private:
+        void CheckCallMethod(char method) const;
+        std::stack<Node> nodes_;
+        mutable std::stack<char> call_stack_;
 
         class BuilderContext
         {
+        public:
             Builder &builder_;
 
-        public:
             BuilderContext(Builder &builder) : builder_(builder) {}
             DictContext StartDict()
             {
                 builder_.StartDictInternal();
                 return DictContext(builder_);
             }
-            DictContext Key(std::string value)
+            KeyContext Key(std::string value)
             {
                 builder_.KeyInternal(std::move(value));
-                return DictContext(builder_);
+                return KeyContext(builder_);
             }
             ArrayContext StartArray()
             {
@@ -60,6 +80,11 @@ namespace json
             DictContext Key(std::string value) = delete;
             BuilderContext EndDict() = delete;
             BuilderContext EndArray() = delete;
+            DictContext Value(Node value)
+            {
+                builder_.ValueInternal(std::move(value));
+                return DictContext(builder_);
+            }
             Node Build() = delete;
         };
 
@@ -69,6 +94,12 @@ namespace json
             ArrayContext(Builder &builder) : BuilderContext(builder) {}
             DictContext Key(std::string value) = delete;
             BuilderContext EndDict() = delete;
+            ArrayContext Value(Node value)
+            {
+                builder_.ValueInternal(std::move(value));
+                return ArrayContext(builder_);
+            }
+            Node Build() = delete;
         };
 
         class DictContext final : public BuilderContext
@@ -87,35 +118,11 @@ namespace json
             Builder &builder_;
 
         public:
-            FinalContext(Builder builder) : builder_(builder) {}
+            FinalContext(Builder &builder) : builder_(builder) {}
             const Node &Build()
             {
                 return builder_.GetRoot();
             }
         };
-
-    public:
-        Builder();
-        ~Builder();
-        FinalContext Value(Node value);
-        DictContext StartDict();
-        ArrayContext StartArray();
-        void KeyInternal(std::string key);
-        void ValueInternal(Node value);
-        void StartDictInternal();
-        void StartArrayInternal();
-        void EndDictInternal();
-        void EndArrayInternal();
-
-        const Node &GetRoot() const
-        {
-            CheckCallMethod('b');
-            return nodes_.top();
-        }
-
-    private:
-        void CheckCallMethod(char method) const;
-        std::stack<Node> nodes_;
-        mutable std::stack<char> call_stack_;
     };
 }
