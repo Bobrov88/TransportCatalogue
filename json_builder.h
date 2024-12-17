@@ -33,9 +33,10 @@ namespace json
 
         class BuilderContext
         {
-        public:
+        protected:
             Builder &builder_;
 
+        public:
             BuilderContext(Builder &builder) : builder_(builder) {}
             DictContext StartDict()
             {

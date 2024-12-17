@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include "json_builder.h"
 #include <set>
 
 using namespace json;
@@ -77,7 +78,6 @@ void JsonReader::GetResponce(const Node &node)
             responces.push_back(ConstructJson(map_responce, stat.at("id").AsInt()));
         }
     }
-
     json::Document doc(responces);
     Print(doc, out_);
 }
@@ -119,9 +119,7 @@ json::Node JsonReader::ConstructJson(const std::optional<std::unordered_set<enti
     using namespace std::string_literals;
 
     if (buses == std::nullopt)
-        return json::Dict{
-            {"request_id"s, json::Node{request_id}},
-            {"error_message"s, json::Node{"not found"s}}};
+        return json::Builder{}.StartDict().Key("request_id"s).Value(request_id).Key("error_message").Value("not found"s).EndDict().Build();
 
     std::set<entity::BusPtr> tmp_buses{buses->begin(), buses->end()};
 
@@ -130,10 +128,7 @@ json::Node JsonReader::ConstructJson(const std::optional<std::unordered_set<enti
     {
         arr.push_back(json::Node(std::string(bus)));
     }
-
-    return json::Dict{
-        {"request_id"s, json::Node{request_id}},
-        {"buses"s, arr}};
+    return json::Builder{}.StartDict().Key("request_id"s).Value(request_id).Key("buses"s).Value(std::move(arr)).EndDict().Build();
 }
 
 json::Node JsonReader::ConstructJson(const std::optional<entity::BusStat> &busstat, int request_id)
@@ -141,16 +136,9 @@ json::Node JsonReader::ConstructJson(const std::optional<entity::BusStat> &busst
     using namespace std::string_literals;
 
     if (!busstat)
-        return json::Dict{
-            {"request_id"s, json::Node{request_id}},
-            {"error_message"s, json::Node{"not found"s}}};
+        return json::Builder{}.StartDict().Key("request_id"s).Value(request_id).Key("error_message"s).Value("not found"s).EndDict().Build();
 
-    return json::Dict{
-        {"request_id"s, json::Node{request_id}},
-        {"curvature"s, json::Node{busstat->curvature_}},
-        {"route_length"s, json::Node{busstat->route_length_}},
-        {"stop_count"s, json::Node{static_cast<int>(busstat->stop_count_)}},
-        {"unique_stop_count"s, json::Node{static_cast<int>(busstat->unique_stop_count_)}}};
+    return json::Builder{}.StartDict().Key("request_id"s).Value(request_id).Key("curvature"s).Value(busstat->curvature_).Key("route_length"s).Value(busstat->route_length_).Key("stop_count"s).Value(static_cast<int>(busstat->stop_count_)).Key("unique_stop_count"s).Value(static_cast<int>(busstat->unique_stop_count_)).EndDict().Build();
 }
 
 json::Node JsonReader::ConstructJson(const svg::Document &document, int request_id)
@@ -159,9 +147,7 @@ json::Node JsonReader::ConstructJson(const svg::Document &document, int request_
     std::ostringstream oss;
     document.Render(oss);
 
-    return json::Dict{
-        {"request_id"s, json::Node{request_id}},
-        {"map"s, json::Node{oss.str()}}};
+    return json::Builder{}.StartDict().Key("request_id"s).Value(request_id).Key("map"s).Value(oss.str()).EndDict().Build();
 }
 
 namespace json

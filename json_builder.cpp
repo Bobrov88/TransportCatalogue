@@ -81,7 +81,7 @@ namespace json
     {
         CheckCallMethod('a');
         std::vector<Node> tmp;
-        while (!nodes_.top().IsArray())
+        while (!nodes_.top().IsArray() || !nodes_.top().AsArray().empty())
         {
             tmp.push_back(std::move(nodes_.top()));
             nodes_.pop();
@@ -96,7 +96,6 @@ namespace json
         CheckCallMethod('b');
         return nodes_.top();
     }
-
     void Builder::CheckCallMethod(char method) const
     {
         /*
