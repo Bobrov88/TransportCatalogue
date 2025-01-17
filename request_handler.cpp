@@ -15,7 +15,7 @@ std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_na
     return busstat;
 }
 
-const std::optional<std::unordered_set<BusPtr>> RequestHandler::GetBusesByStop(const std::string_view &stop_name) const
+std::optional<std::unordered_set<BusPtr>> RequestHandler::GetBusesByStop(const std::string_view &stop_name) const
 {
     if (db_.GetStop(stop_name) == nullptr)
     {
@@ -91,4 +91,9 @@ svg::Document RequestHandler::RenderMap() const
         doc.Add(s);
 
     return doc;
+}
+
+std::optional<RouteItems> RequestHandler::GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const
+{
+    return {};
 }

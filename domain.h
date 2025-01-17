@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <deque>
+#include <variant>
 #include "geo.h"
 
 namespace entity
@@ -29,6 +30,17 @@ namespace entity
         size_t stop_count_;
         size_t unique_stop_count_;
     };
+
+    using WaitingOnStop = std::string_view;
+
+    struct UsingBus
+    {
+        std::string_view bus_name;
+        int span_count;
+        double used_time;
+    };
+
+    using RouteItems = std::variant<WaitingOnStop, UsingBus>;
 
     using BusPtr = std::string_view;
 
