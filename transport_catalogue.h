@@ -24,9 +24,6 @@ namespace Data
         std::unordered_map<std::string_view, const Stop *, Stop_Hash> stops_;
         std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> distances_;
 
-        static int bus_wait_time_;
-        static double bus_velocity_;
-
     public:
         void AddBus(std::string_view name, std::vector<std::string_view> stops, bool is_round_trip);
         void AddStop(std::string_view name, Coordinates &&coordinates);
@@ -35,11 +32,11 @@ namespace Data
         const Stop *GetStop(std::string_view stop) const;
         const std::unordered_map<std::string_view, const Bus *, Bus_Hash> &GetBuses() const;
         const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &GetStops() const;
+        const std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash>& GetDistances() const;
         size_t GetStopCount(std::string_view bus) const;
         size_t GetUniqueStopCount(std::string_view bus) const;
         double GetRouteLength(std::string_view bus) const;
         int GetRealRouteLength(std::string_view bus) const;
         int GetDistanceBetweenStops(std::string_view from, std::string_view to) const;
-        static void SetRouteSettings(const int bus_wait_time, const double bus_velocity_);
     };
 }

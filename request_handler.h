@@ -4,6 +4,7 @@
 #include <optional>
 #include <unordered_set>
 #include "transport_catalogue.h"
+#include "transport_router.h"
 #include "map_renderer.h"
 
 using namespace entity;
@@ -20,9 +21,11 @@ public:
 
     svg::Document RenderMap() const;
 
-    std::optional<RouteItems> GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const;
+    std::pair<double, std::optional<std::vector<RouteItems>>> GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const;
+    void InitializeRouter();
 
 private:
     const TransportCatalogue &db_;
     const Renderer::MapRenderer &renderer_;
+    TransportRouter router_;
 };

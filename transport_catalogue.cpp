@@ -117,7 +117,7 @@ const std::unordered_map<std::string_view, const Stop *, Stop_Hash> &TransportCa
     return stops_;
 }
 
-void TransportCatalogue::SetRouteSettings(const int bus_wait_time, const double bus_velocity) {
-    bus_wait_time_ = bus_wait_time;
-    bus_velocity_ = bus_velocity;
+const std::unordered_map<std::pair<const Stop *, const Stop *>, int, Dist_Hash> &TransportCatalogue::GetDistances() const
+{
+    return distances_;
 }

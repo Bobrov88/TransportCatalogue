@@ -44,6 +44,12 @@ namespace entity
 
     using BusPtr = std::string_view;
 
+    namespace routestats
+    {
+        static int bus_wait_time;
+        static double bus_velocity;
+    }
+
     namespace hashers
     {
         struct Bus_Hash

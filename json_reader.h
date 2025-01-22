@@ -3,6 +3,7 @@
 #include "json.h"
 #include "request_handler.h"
 #include "map_renderer.h"
+#include "transport_router.h"
 
 using namespace Data;
 using namespace Renderer;
@@ -15,6 +16,7 @@ namespace json
         TransportCatalogue &db_;
         RequestHandler &rh_;
         MapRenderer &renderer_;
+
         std::istream &in_;
         std::ostream &out_;
 
@@ -30,8 +32,16 @@ namespace json
         json::Node ConstructJson(const std::optional<entity::RouteItems> &items, int request_id);
 
     public:
-        JsonReader(TransportCatalogue &db, RequestHandler &rh, MapRenderer &renderer, std::istream &in, std::ostream &out) : db_(db), rh_(rh), renderer_(renderer), in_(in), out_(out) {}
-        void ProcessTransportCatalogue();
+        JsonReader(TransportCatalogue &db,
+                   RequestHandler &rh,
+                   MapRenderer &renderer,
+                   std::istream &in,
+                   std::ostream &out) : db_(db),
+                                        rh_(rh),
+                                        renderer_(renderer),
+                                        in_(in),
+                                        out_(out) {}
+        void Process();
     };
 
     svg::Color GetColorFromArray(const Node &node);

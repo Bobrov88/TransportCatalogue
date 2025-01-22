@@ -1,4 +1,5 @@
 #include "request_handler.h"
+#include "transport_router.h"
 
 std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view &bus_name) const
 {
@@ -93,7 +94,56 @@ svg::Document RequestHandler::RenderMap() const
     return doc;
 }
 
-std::optional<RouteItems> RequestHandler::GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const
+void RequestHandler::InitializeRouter()
 {
-    return {};
+    router_.InitializeGraph(db_);
+}
+
+std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const
+{
+    if (!db_.GetStop(from_stop)->is_in_route ||
+        !db_.GetStop(to_stop)->is_in_route)
+        return {0, std::nullopt};
+
+    using namespace graph;
+    auto &graph = router_.GetGraph();
+    auto &router = router_.GetRouter();
+
+    auto route_info = router->BuildRoute(router_.GetIdByStop(from_stop),
+                                         router_.GetIdByStop(to_stop));
+    if (route_info->edges.empty())
+        return {0, std::nullopt};
+
+    std::vector<RouteItems> route_items;
+    route_items.push_back(router_.GetStopById(graph.GetEdge(route_info->edges[0]).from));
+    UsingBus using_bus = {};
+
+    for (graph::EdgeId id : route_info->edges)
+    {
+        std::string_view from = router_.GetStopById(graph.GetEdge(id).from);
+        std::string_view to = router_.GetStopById(graph.GetEdge(id).to);
+
+        const auto &buses = *GetBusesByStop(from);
+        for (auto bus : buses)
+        {
+            auto &stops = db_.GetBus(bus)->stops;
+            if (auto from_found = std::find(stops.cbegin(), stops.cend(), from); from_found != stops.cend())
+            {
+                auto to_found = std::find(stops.cbegin(), stops.cend(), to);
+                if (to_found == stops.cend() ||
+                    std::abs(std::distance(from_found, to_found)) != 1)
+                    continue;
+
+                using_bus.bus_name = bus;
+                using_bus.span_count++;
+                using_bus.used_time += db_.GetDistanceBetweenStops(from, to) / routestats::bus_velocity;
+                break;
+            }
+            route_items.push_back(using_bus);
+            route_items.push_back(to);
+            using_bus = {};
+        }
+    }
+    route_items.pop_back();
+    return {route_info->weight, route_items};
 }

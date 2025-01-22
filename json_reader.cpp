@@ -4,7 +4,7 @@
 
 using namespace json;
 
-void JsonReader::ProcessTransportCatalogue()
+void JsonReader::Process()
 {
     Document doc(Load(in_));
     const auto &dict = doc.GetRoot().AsMap();
@@ -35,8 +35,9 @@ void JsonReader::FillDataBase(const Node &node)
 void JsonReader::GetRouteSettings(const Node &node)
 {
     const auto &data = node.AsMap();
-    TransportCatalogue::SetRouteSettings(data.at("bus_wait_time").AsInt(),
-                                         data.at("bus_velocity").AsDouble());
+    routestats::bus_wait_time = data.at("bus_wait_time").AsInt();
+    routestats::bus_velocity = data.at("bus_velocity").AsDouble();
+    rh_.InitializeRouter();
 }
 
 void JsonReader::FillStops(const Dict &node, distances &temp_distances)
@@ -89,7 +90,7 @@ void JsonReader::GetResponce(const Node &node)
         {
             const auto route_responce = rh_.GetRouteItems(stat.at("from").AsString(),
                                                           stat.at("to").AsString());
-            responces.push_back(ConstructJson(route_responce, stat.at("id").AsInt()));
+          //  responces.push_back(ConstructJson(route_responce, stat.at("id").AsInt()));
         }
     }
     json::Document doc(responces);
@@ -203,6 +204,14 @@ json::Node JsonReader::ConstructJson(const svg::Document &document, int request_
         .Value(oss.str())
         .EndDict()
         .Build();
+}
+
+json::Node JsonReader::ConstructJson(const std::optional<entity::RouteItems> &items, int request_id)
+{
+    using namespace std::string_literals;
+    if (items == std::nullopt && request_id)
+        return {};
+        return json::Node{};
 }
 
 namespace json
