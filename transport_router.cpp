@@ -2,10 +2,10 @@
 
 using namespace Data;
 
-void TransportRouter::GiveIdToStops(const TransportCatalogue &db)
+void TransportRouter::GiveIdToStops()
 {
     size_t id = 0;
-    for (const auto &[stop_name, _] : db.GetStops())
+    for (const auto &[stop_name, _] : db_.GetStops())
     {
         stopsbyids_.insert({id, stop_name});
         idsbystops_.insert({stop_name, id});
@@ -32,16 +32,35 @@ const std::unique_ptr<graph::Router<double>> &TransportRouter::GetRouter() const
     return router_;
 }
 
-void TransportRouter::InitializeGraph(const TransportCatalogue &db)
+void TransportRouter::InitializeGraph()
 {
-    GiveIdToStops(db);
-    graph::DirectedWeightedGraph<double> dw_graph(db.GetStops().size());
+    GiveIdToStops();
+    graph::DirectedWeightedGraph<double> dw_graph(db_.GetStops().size());
 
-    for (const auto &[stops, distance] : db.GetDistances())
+    for (const auto &[stops, distance] : db_.GetDistances())
         dw_graph.AddEdge({GetIdByStop(stops.first->name),
                           GetIdByStop(stops.second->name),
                           distance / routestats::bus_velocity});
 
     dw_graph_ = std::move(dw_graph);
     router_ = std::make_unique<graph::Router<double>>(dw_graph_);
+}
+
+std::tuple<std::vector<std::string_view>, std::vector<double>> TransportRouter::GetRouteVector(const graph::Router<double>::RouteInfo &routeInfo) const
+{
+    const auto &edges = routeInfo.edges;
+
+    std::vector<std::string_view> route_vector;
+    route_vector.reserve(edges.size() + 1);
+    std::vector<double> weights_vector;
+    weights_vector.reserve(edges.size());
+
+    for (auto &edge : edges)
+    {
+        route_vector.push_back(GetStopById(dw_graph_.GetEdge(edge).from));
+        weights_vector.push_back(dw_graph_.GetEdge(edge).weight);
+    }
+    route_vector.push_back(GetStopById(dw_graph_.GetEdge(edges.back()).to));
+
+    return {route_vector, weights_vector};
 }

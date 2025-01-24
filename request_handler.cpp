@@ -1,3 +1,4 @@
+#include <numeric>
 #include "request_handler.h"
 #include "transport_router.h"
 
@@ -96,7 +97,7 @@ svg::Document RequestHandler::RenderMap() const
 
 void RequestHandler::InitializeRouter()
 {
-    router_.InitializeGraph(db_);
+    router_.InitializeGraph();
 }
 
 std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const
@@ -106,43 +107,31 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
         return {0, std::nullopt};
 
     using namespace graph;
-    auto &graph = router_.GetGraph();
-    auto &router = router_.GetRouter();
+    const auto & graph = router_.GetGraph();
+    const auto & router = router_.GetRouter();
 
     auto route_info = router->BuildRoute(router_.GetIdByStop(from_stop),
                                          router_.GetIdByStop(to_stop));
     if (route_info->edges.empty())
         return {0, std::nullopt};
 
+    const auto [stops_chain, weights] = router_.GetRouteVector(*route_info);
+
     std::vector<RouteItems> route_items;
     route_items.push_back(router_.GetStopById(graph.GetEdge(route_info->edges[0]).from));
-    UsingBus using_bus = {};
 
-    for (graph::EdgeId id : route_info->edges)
+    auto it = stops_chain.begin();
+    auto diff = it;
+    while (it != stops_chain.end())
     {
-        std::string_view from = router_.GetStopById(graph.GetEdge(id).from);
-        std::string_view to = router_.GetStopById(graph.GetEdge(id).to);
-
-        const auto &buses = *GetBusesByStop(from);
-        for (auto bus : buses)
-        {
-            auto &stops = db_.GetBus(bus)->stops;
-            if (auto from_found = std::find(stops.cbegin(), stops.cend(), from); from_found != stops.cend())
-            {
-                auto to_found = std::find(stops.cbegin(), stops.cend(), to);
-                if (to_found == stops.cend() ||
-                    std::abs(std::distance(from_found, to_found)) != 1)
-                    continue;
-
-                using_bus.bus_name = bus;
-                using_bus.span_count++;
-                using_bus.used_time += db_.GetDistanceBetweenStops(from, to) / routestats::bus_velocity;
-                break;
-            }
-            route_items.push_back(using_bus);
-            route_items.push_back(to);
-            using_bus = {};
-        }
+        std::string_view bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.cend(), *GetBusesByStop(*it));
+        int w_begin_diff = static_cast<int>(std::distance(stops_chain.begin(), diff));
+        int w_end_diff = static_cast<int>(std::distance(stops_chain.begin(), it));
+        double weight_of_chain = std::accumulate(weights.begin() + w_begin_diff, weights.begin() + w_end_diff, 0.);
+        diff = it;
+        route_items.push_back(UsingBus{bus, w_end_diff - w_begin_diff, weight_of_chain});
+        route_items.push_back(*it);
+        ++it;
     }
     route_items.pop_back();
     return {route_info->weight, route_items};

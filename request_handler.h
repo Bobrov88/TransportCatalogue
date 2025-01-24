@@ -13,7 +13,9 @@ using namespace Data;
 class RequestHandler
 {
 public:
-    RequestHandler(const TransportCatalogue &db, const Renderer::MapRenderer &renderer) : db_(db), renderer_(renderer) {}
+    RequestHandler(const TransportCatalogue &db, const Renderer::MapRenderer &renderer) : db_(db),
+                                                                                          renderer_(renderer),
+                                                                                          router_{TransportRouter{db_}} {}
 
     std::optional<BusStat> GetBusStat(const std::string_view &bus_name) const;
 
