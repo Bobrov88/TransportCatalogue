@@ -27,20 +27,27 @@ const TransportRouter::Graph &TransportRouter::GetGraph() const
 {
     return dw_graph_;
 }
-const std::unique_ptr<graph::Router<double>> &TransportRouter::GetRouter() const
+const std::unique_ptr<graph::Router<double>> &TransportRouter::GetInnerRouter() const
 {
     return router_;
 }
 
-void TransportRouter::InitializeGraph()
+int TransportRouter::GetBusWaitingTime() const {
+    return stats_.bus_wait_time;
+}
+
+void TransportRouter::InitializeGraph(routestats stats)
 {
+    stats_ = stats;
     GiveIdToStops();
     graph::DirectedWeightedGraph<double> dw_graph(db_.GetStops().size());
 
     for (const auto &[stops, distance] : db_.GetDistances())
+    {
         dw_graph.AddEdge({GetIdByStop(stops.first->name),
                           GetIdByStop(stops.second->name),
-                          distance / routestats::bus_velocity});
+                          distance / stats_.bus_velocity});
+    }
 
     dw_graph_ = std::move(dw_graph);
     router_ = std::make_unique<graph::Router<double>>(dw_graph_);

@@ -24,7 +24,7 @@ public:
     svg::Document RenderMap() const;
 
     std::pair<double, std::optional<std::vector<RouteItems>>> GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const;
-    void InitializeRouter();
+    void InitializeRouter(routestats stats);
 
 private:
     const TransportCatalogue &db_;

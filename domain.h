@@ -31,7 +31,7 @@ namespace entity
         size_t unique_stop_count_;
     };
 
-    using WaitingOnStop = std::string_view;
+    using WaitingOnStop = std::pair<std::string_view, int>;
 
     struct UsingBus
     {
@@ -44,11 +44,11 @@ namespace entity
 
     using BusPtr = std::string_view;
 
-    namespace routestats
+    struct routestats
     {
-        static int bus_wait_time;
-        static double bus_velocity;
-    }
+        int bus_wait_time;
+        double bus_velocity;
+    };
 
     namespace hashers
     {

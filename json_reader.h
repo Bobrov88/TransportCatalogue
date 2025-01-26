@@ -29,7 +29,7 @@ namespace json
         json::Node ConstructJson(const std::optional<std::unordered_set<entity::BusPtr>> &buses, int request_id);
         json::Node ConstructJson(const std::optional<entity::BusStat> &busstat, int reqeust_id);
         json::Node ConstructJson(const svg::Document &document, int request_id);
-        json::Node ConstructJson(const std::optional<entity::RouteItems> &items, int request_id);
+        json::Node ConstructJson(const std::pair<double, std::optional<std::vector<RouteItems>>> &items, int request_id);
 
     public:
         JsonReader(TransportCatalogue &db,
@@ -47,4 +47,7 @@ namespace json
     svg::Color GetColorFromArray(const Node &node);
     svg::Point GetPointFromArray(const Node &node);
     std::vector<svg::Color> GetPaletteFromArray(const Node &node);
+    json::Node addItem(WaitingOnStop waiting);
+    json::Node addItem(UsingBus bus);
+    json::Node NotFoundResponse(int request_id);
 }

@@ -13,18 +13,20 @@ namespace Data
 
         std::unordered_map<size_t, std::string_view> stopsbyids_;
         std::unordered_map<std::string_view, size_t> idsbystops_;
-        Graph dw_graph_;
         std::unique_ptr<graph::Router<double>> router_;
-        void GiveIdToStops();
         const TransportCatalogue &db_;
+        routestats stats_;
+        Graph dw_graph_;
+        void GiveIdToStops();
 
     public:
         TransportRouter(const TransportCatalogue &db) : db_(db) {}
-        void InitializeGraph();
+        void InitializeGraph(routestats stats);
         const Graph &GetGraph() const;
-        const std::unique_ptr<graph::Router<double>> &GetRouter() const;
+        const std::unique_ptr<graph::Router<double>> &GetInnerRouter() const;
         std::string_view GetStopById(size_t id) const;
         size_t GetIdByStop(std::string_view stop) const;
+        int GetBusWaitingTime() const;
         std::tuple<std::vector<std::string_view>, std::vector<double>> GetRouteVector(const graph::Router<double>::RouteInfo &) const;
 
         template <typename It>
@@ -81,7 +83,6 @@ namespace Data
                     used_bus = bus;
                     farthest_it = it2;
                 }
-                it2 = it;
             }
             it = farthest_it - 1;
             return used_bus;

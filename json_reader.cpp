@@ -1,6 +1,7 @@
 #include "json_reader.h"
 #include "json_builder.h"
 #include <set>
+#include <variant>
 
 using namespace json;
 
@@ -35,9 +36,8 @@ void JsonReader::FillDataBase(const Node &node)
 void JsonReader::GetRouteSettings(const Node &node)
 {
     const auto &data = node.AsMap();
-    routestats::bus_wait_time = data.at("bus_wait_time").AsInt();
-    routestats::bus_velocity = data.at("bus_velocity").AsDouble();
-    rh_.InitializeRouter();
+    rh_.InitializeRouter({data.at("bus_wait_time").AsInt(),
+                          data.at("bus_velocity").AsDouble()});
 }
 
 void JsonReader::FillStops(const Dict &node, distances &temp_distances)
@@ -90,7 +90,7 @@ void JsonReader::GetResponce(const Node &node)
         {
             const auto route_responce = rh_.GetRouteItems(stat.at("from").AsString(),
                                                           stat.at("to").AsString());
-          //  responces.push_back(ConstructJson(route_responce, stat.at("id").AsInt()));
+            responces.push_back(ConstructJson(route_responce, stat.at("id").AsInt()));
         }
     }
     json::Document doc(responces);
@@ -134,14 +134,7 @@ json::Node JsonReader::ConstructJson(const std::optional<std::unordered_set<enti
     using namespace std::string_literals;
 
     if (buses == std::nullopt)
-        return json::Builder{}
-            .StartDict()
-            .Key("request_id"s)
-            .Value(request_id)
-            .Key("error_message")
-            .Value("not found"s)
-            .EndDict()
-            .Build();
+        return NotFoundResponse(request_id);
 
     std::set<entity::BusPtr> tmp_buses{buses->begin(), buses->end()};
 
@@ -165,14 +158,7 @@ json::Node JsonReader::ConstructJson(const std::optional<entity::BusStat> &busst
     using namespace std::string_literals;
 
     if (!busstat)
-        return json::Builder{}
-            .StartDict()
-            .Key("request_id"s)
-            .Value(request_id)
-            .Key("error_message"s)
-            .Value("not found"s)
-            .EndDict()
-            .Build();
+        return NotFoundResponse(request_id);
 
     return json::Builder{}
         .StartDict()
@@ -206,12 +192,31 @@ json::Node JsonReader::ConstructJson(const svg::Document &document, int request_
         .Build();
 }
 
-json::Node JsonReader::ConstructJson(const std::optional<entity::RouteItems> &items, int request_id)
+json::Node JsonReader::ConstructJson(const std::pair<double, std::optional<std::vector<RouteItems>>> &items, int request_id)
 {
     using namespace std::string_literals;
-    if (items == std::nullopt && request_id)
-        return {};
-        return json::Node{};
+    if (!items.second)
+        return NotFoundResponse(request_id);
+
+    json::Array arr;
+    for (const auto &item : *items.second)
+    {
+        if (std::holds_alternative<WaitingOnStop>(item))
+            arr.push_back(addItem(std::get<WaitingOnStop>(item)));
+        if (std::holds_alternative<UsingBus>(item))
+            arr.push_back(addItem(std::get<UsingBus>(item)));
+    }
+
+    return json::Builder{}
+        .StartDict()
+        .Key("request_id"s)
+        .Value(request_id)
+        .Key("total_time"s)
+        .Value(items.first)
+        .Key("items")
+        .Value(arr)
+        .EndDict()
+        .Build();
 }
 
 namespace json
@@ -248,5 +253,50 @@ namespace json
                 palette.push_back(GetColorFromArray(color));
         }
         return palette;
+    }
+
+    json::Node addItem(WaitingOnStop waiting)
+    {
+        using namespace std::string_literals;
+        return json::Builder{}
+            .StartDict()
+            .Key("type"s)
+            .Value("Wait"s)
+            .Key("stop_name"s)
+            .Value(std::string(waiting.first))
+            .Key("time"s)
+            .Value(waiting.second)
+            .EndDict()
+            .Build();
+    }
+
+    json::Node addItem(UsingBus bus)
+    {
+        using namespace std::string_literals;
+        return json::Builder{}
+            .StartDict()
+            .Key("type"s)
+            .Value("Bus"s)
+            .Key("bus"s)
+            .Value(std::string(bus.bus_name))
+            .Key("span_count"s)
+            .Value(bus.span_count)
+            .Key("time")
+            .Value(bus.used_time)
+            .EndDict()
+            .Build();
+    }
+
+    json::Node NotFoundResponse(int request_id)
+    {
+        using namespace std::string_literals;
+        return json::Builder{}
+            .StartDict()
+            .Key("request_id"s)
+            .Value(request_id)
+            .Key("error_message"s)
+            .Value("not found"s)
+            .EndDict()
+            .Build();
     }
 }

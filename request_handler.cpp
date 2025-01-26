@@ -95,44 +95,47 @@ svg::Document RequestHandler::RenderMap() const
     return doc;
 }
 
-void RequestHandler::InitializeRouter()
+void RequestHandler::InitializeRouter(routestats stats)
 {
-    router_.InitializeGraph();
+    router_.InitializeGraph(stats);
 }
 
 std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRouteItems(const std::string_view &from_stop, const std::string_view &to_stop) const
 {
     if (!db_.GetStop(from_stop)->is_in_route ||
         !db_.GetStop(to_stop)->is_in_route)
-        return {0, std::nullopt};
+        return {0., std::nullopt};
 
     using namespace graph;
-    const auto & graph = router_.GetGraph();
-    const auto & router = router_.GetRouter();
+    const auto &router = router_.GetInnerRouter();
 
     auto route_info = router->BuildRoute(router_.GetIdByStop(from_stop),
                                          router_.GetIdByStop(to_stop));
     if (route_info->edges.empty())
-        return {0, std::nullopt};
+        return {0., std::nullopt};
 
     const auto [stops_chain, weights] = router_.GetRouteVector(*route_info);
+    int waiting_time = router_.GetBusWaitingTime();
 
     std::vector<RouteItems> route_items;
-    route_items.push_back(router_.GetStopById(graph.GetEdge(route_info->edges[0]).from));
-
+    route_items.push_back(WaitingOnStop{from_stop, waiting_time});
     auto it = stops_chain.begin();
-    auto diff = it;
     while (it != stops_chain.end())
     {
+        auto diff = it;
         std::string_view bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.cend(), *GetBusesByStop(*it));
+        if (bus.empty())
+            break;
         int w_begin_diff = static_cast<int>(std::distance(stops_chain.begin(), diff));
         int w_end_diff = static_cast<int>(std::distance(stops_chain.begin(), it));
         double weight_of_chain = std::accumulate(weights.begin() + w_begin_diff, weights.begin() + w_end_diff, 0.);
-        diff = it;
         route_items.push_back(UsingBus{bus, w_end_diff - w_begin_diff, weight_of_chain});
-        route_items.push_back(*it);
+        route_items.push_back(WaitingOnStop{*it, waiting_time});
+        route_info->weight += waiting_time;
         ++it;
     }
+    route_info->weight -= waiting_time;
     route_items.pop_back();
+
     return {route_info->weight, route_items};
 }
