@@ -132,6 +132,7 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
         route_items.push_back(UsingBus{bus, w_end_diff - w_begin_diff, weight_of_chain});
         route_info->weight += waiting_time;
     }
+    std::cerr<<"1\n";
     route_items.pop_back();
     return {route_info->weight, route_items};
 }
