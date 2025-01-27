@@ -45,36 +45,25 @@ namespace Data
                 size_t current_chain_length = 0;
                 if (auto found = std::find(stops.cbegin(), stops.cend(), *it); found != stops.cend())
                 {
-                    if (current_bus->is_round_trip)
+                    if (std::next(it2) != end && std::next(found) != stops.cend() && *std::next(it2) == *std::next(found))
                     {
-                        while (it2 != end && found != stops.cend() && *found == *it2)
+                        do
                         {
                             ++current_chain_length;
                             ++found;
                             ++it2;
-                        }
+                        } while (it2 != end && found != stops.cend() && *it2 == *found);
                     }
-                    else
+
+                    else if (!current_bus->is_round_trip)
                     {
-                        if (std::next(it2) != end && std::next(found) != stops.cend() && *std::next(it2) == *std::next(found))
-                        {
+                        if (std::next(it2) != end && std::prev(found) != std::prev(stops.begin()) && *std::next(it2) == *std::prev(found))
                             do
                             {
                                 ++current_chain_length;
-                                ++found;
+                                --found;
                                 ++it2;
-                            } while (it2 != end && found != stops.cend() && *it2 == *found);
-                        }
-                        else
-                        {
-                            if (std::next(it2) != end && std::prev(found) != std::prev(stops.begin()) && *std::next(it2) == *std::prev(found))
-                                do
-                                {
-                                    ++current_chain_length;
-                                    --found;
-                                    ++it2;
-                                } while (it2 != end && found != std::prev(stops.begin()) && *it2 == *found);
-                        }
+                            } while (it2 != end && found != std::prev(stops.begin()) && *it2 == *found);
                     }
                 }
                 if (current_chain_length > max_chain_length)

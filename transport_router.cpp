@@ -32,7 +32,8 @@ const std::unique_ptr<graph::Router<double>> &TransportRouter::GetInnerRouter() 
     return router_;
 }
 
-int TransportRouter::GetBusWaitingTime() const {
+int TransportRouter::GetBusWaitingTime() const
+{
     return stats_.bus_wait_time;
 }
 
@@ -46,7 +47,7 @@ void TransportRouter::InitializeGraph(routestats stats)
     {
         dw_graph.AddEdge({GetIdByStop(stops.first->name),
                           GetIdByStop(stops.second->name),
-                          distance / stats_.bus_velocity});
+                          (distance * 60) / (1000 * stats_.bus_velocity)});
     }
 
     dw_graph_ = std::move(dw_graph);

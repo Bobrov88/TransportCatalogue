@@ -118,10 +118,10 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
     int waiting_time = router_.GetBusWaitingTime();
 
     std::vector<RouteItems> route_items;
-    route_items.push_back(WaitingOnStop{from_stop, waiting_time});
     auto it = stops_chain.begin();
     while (it != stops_chain.end())
     {
+        route_items.push_back(WaitingOnStop{*it, waiting_time});
         auto diff = it;
         std::string_view bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.cend(), *GetBusesByStop(*it));
         if (bus.empty())
@@ -130,12 +130,8 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
         int w_end_diff = static_cast<int>(std::distance(stops_chain.begin(), it));
         double weight_of_chain = std::accumulate(weights.begin() + w_begin_diff, weights.begin() + w_end_diff, 0.);
         route_items.push_back(UsingBus{bus, w_end_diff - w_begin_diff, weight_of_chain});
-        route_items.push_back(WaitingOnStop{*it, waiting_time});
         route_info->weight += waiting_time;
-        ++it;
     }
-    route_info->weight -= waiting_time;
     route_items.pop_back();
-
     return {route_info->weight, route_items};
 }

@@ -203,7 +203,7 @@ json::Node JsonReader::ConstructJson(const std::pair<double, std::optional<std::
     {
         if (std::holds_alternative<WaitingOnStop>(item))
             arr.push_back(addItem(std::get<WaitingOnStop>(item)));
-        if (std::holds_alternative<UsingBus>(item))
+        else if (std::holds_alternative<UsingBus>(item))
             arr.push_back(addItem(std::get<UsingBus>(item)));
     }
 
