@@ -195,8 +195,18 @@ json::Node JsonReader::ConstructJson(const svg::Document &document, int request_
 json::Node JsonReader::ConstructJson(const std::pair<double, std::optional<std::vector<RouteItems>>> &items, int request_id)
 {
     using namespace std::string_literals;
-    if (!items.second)
+    if (items.first == -1)
         return NotFoundResponse(request_id);
+
+    if (items.first == 0)
+        return json::Builder{}
+            .StartDict()
+            .Key("request_id"s)
+            .Value(request_id)
+            .Key("total_time"s)
+            .Value(0)
+            .EndDict()
+            .Build();
 
     json::Array arr;
     for (const auto &item : *items.second)

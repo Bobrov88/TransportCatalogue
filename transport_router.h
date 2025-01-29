@@ -19,8 +19,32 @@ namespace Data
         Graph dw_graph_;
         void GiveIdToStops();
 
+        template <typename It1, typename It2, typename Operation>
+        [[maybe_unused]] bool FindHelper(It1 &it, It1 it_end, It2 stop_border, It2 &found, Operation op, int direction, size_t &current_chain_length) const
+        {
+            bool entered = false;
+            std::cerr << __LINE__ << std::endl;
+            if (std::next(it) != it_end && op(found) != op(stop_border) && *std::next(it) == *op(found))
+            {
+                std::cerr<<"It="<<*it<<" --- Next(it)="<<*std::next(it)<<std::endl;
+                std::cerr << __LINE__ << std::endl;
+                entered = true;
+                do
+                {
+                    std::cerr << __LINE__ << std::endl;
+                    ++current_chain_length;
+                    std::advance(found, direction);
+                    ++it;
+                } while (it != it_end && found != op(stop_border) && *it == *found);
+            }
+            std::cerr << __LINE__ << std::endl;
+            return entered;
+        }
+
     public:
-        TransportRouter(const TransportCatalogue &db) : db_(db) {}
+        TransportRouter(const TransportCatalogue &db) : db_(db)
+        {
+        }
         void InitializeGraph(routestats stats);
         const Graph &GetGraph() const;
         const std::unique_ptr<graph::Router<double>> &GetInnerRouter() const;
@@ -32,44 +56,50 @@ namespace Data
         template <typename It>
         std::string_view FindMostUsedBusInStopsChain(It &it, It end, const std::unordered_set<BusPtr> &buses) const
         {
-            if (it == end)
-                return {};
+            std::cerr << __LINE__ << std::endl;
             size_t max_chain_length = 0;
             std::string_view used_bus;
             auto farthest_it = it;
             for (const auto &bus : buses)
             {
+                std::cerr << __LINE__ << std::endl;
                 const auto &current_bus = db_.GetBus(bus);
                 const auto &stops = current_bus->stops;
                 auto it2 = it;
                 size_t current_chain_length = 0;
-                if (auto found = std::find(stops.cbegin(), stops.cend(), *it); found != stops.cend())
+                if (auto found = std::find(stops.begin(), stops.end(), *it); found != stops.cend())
                 {
-                    if (std::next(it2) != end && std::next(found) != stops.cend() && *std::next(it2) == *std::next(found))
+                    std::cerr << __LINE__ << std::endl;
+                    if (!FindHelper(it2, end, std::prev(stops.end()), found, [](const auto &i)
+                                    { return std::next(i); }, 1, current_chain_length))
                     {
-                        do
+                        std::cerr << __LINE__ << std::endl;
+                        if (!current_bus->is_round_trip)
                         {
-                            ++current_chain_length;
-                            ++found;
-                            ++it2;
-                        } while (it2 != end && found != stops.cend() && *it2 == *found);
-                    }
-
-                    else if (!current_bus->is_round_trip)
-                    {
-                        if (std::next(it2) != end && std::prev(found) != std::prev(stops.begin()) && *std::next(it2) == *std::prev(found))
-                            do
+                            std::cerr << __LINE__ << std::endl;
+                            FindHelper(it2, end, stops.begin(), found, [](const auto &i)
+                                       { return std::prev(i); }, -1, current_chain_length);
+                        }
+                        else
+                        {
+                            std::cerr << __LINE__ << std::endl;
+                            found = std::find(std::next(found), stops.end(), *it);
+                            if (found != stops.end())
                             {
-                                ++current_chain_length;
-                                --found;
-                                ++it2;
-                            } while (it2 != end && found != std::prev(stops.begin()) && *it2 == *found);
+                                std::cerr << __LINE__ << std::endl;
+                                FindHelper(it2, end, std::prev(stops.end()), found, [](const auto &i)
+                                           { return std::next(i); }, 1, current_chain_length);
+                            }
+                        }
                     }
                 }
                 if (current_chain_length > max_chain_length)
                 {
+                    std::cerr << __LINE__ << std::endl;
+                    std::cerr << current_chain_length << ">" << max_chain_length << std::endl;
                     max_chain_length = current_chain_length;
                     used_bus = bus;
+                    std::cerr << bus << std::endl;
                     farthest_it = it2;
                 }
             }

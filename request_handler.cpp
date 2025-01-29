@@ -104,6 +104,9 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
 {
     if (!db_.GetStop(from_stop)->is_in_route ||
         !db_.GetStop(to_stop)->is_in_route)
+        return {-1., std::nullopt};
+
+    if (from_stop == to_stop)
         return {0., std::nullopt};
 
     using namespace graph;
@@ -112,27 +115,37 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
     auto route_info = router->BuildRoute(router_.GetIdByStop(from_stop),
                                          router_.GetIdByStop(to_stop));
     if (route_info->edges.empty())
-        return {0., std::nullopt};
+        return {-1., std::nullopt};
 
     const auto [stops_chain, weights] = router_.GetRouteVector(*route_info);
     int waiting_time = router_.GetBusWaitingTime();
 
     std::vector<RouteItems> route_items;
     auto it = stops_chain.begin();
-    while (it != stops_chain.end())
+    while (true)
     {
         route_items.push_back(WaitingOnStop{*it, waiting_time});
         auto diff = it;
-        std::string_view bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.cend(), *GetBusesByStop(*it));
+        std::string_view bus;
+        try
+        {
+            bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.end(), *GetBusesByStop(*it));
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+            break;
+        }
         if (bus.empty())
             break;
+            std::cout<<"11\n";
         int w_begin_diff = static_cast<int>(std::distance(stops_chain.begin(), diff));
         int w_end_diff = static_cast<int>(std::distance(stops_chain.begin(), it));
         double weight_of_chain = std::accumulate(weights.begin() + w_begin_diff, weights.begin() + w_end_diff, 0.);
         route_items.push_back(UsingBus{bus, w_end_diff - w_begin_diff, weight_of_chain});
         route_info->weight += waiting_time;
     }
-    std::cerr<<"1\n";
+    std::cout<<"1\n";
     route_items.pop_back();
     return {route_info->weight, route_items};
 }
