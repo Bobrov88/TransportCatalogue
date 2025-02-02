@@ -54,7 +54,7 @@ void TransportRouter::InitializeGraph(routestats stats)
     router_ = std::make_unique<graph::Router<double>>(dw_graph_);
 }
 
-std::tuple<std::vector<std::string_view>, std::vector<double>> TransportRouter::GetRouteVector(const graph::Router<double>::RouteInfo &routeInfo) const
+std::pair<std::vector<std::string_view>, std::vector<double>> TransportRouter::GetRouteVector(const graph::Router<double>::RouteInfo &routeInfo) const
 {
     const auto &edges = routeInfo.edges;
 

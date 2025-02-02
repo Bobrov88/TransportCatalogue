@@ -2,6 +2,7 @@
 #include "json_builder.h"
 #include <set>
 #include <variant>
+#include <thread>
 
 using namespace json;
 
@@ -67,7 +68,6 @@ void JsonReader::GetResponce(const Node &node)
 {
     using namespace std::string_literals;
     std::vector<json::Node> responces;
-
     for (const auto &req : node.AsArray())
     {
         const auto &stat = req.AsMap();
@@ -90,10 +90,14 @@ void JsonReader::GetResponce(const Node &node)
         {
             const auto route_responce = rh_.GetRouteItems(stat.at("from").AsString(),
                                                           stat.at("to").AsString());
+            std::cerr << "result of get\n";
             responces.push_back(ConstructJson(route_responce, stat.at("id").AsInt()));
         }
+
+        std::cerr << "we are her\n";
     }
     json::Document doc(responces);
+    std::cerr << "json\n";
     Print(doc, out_);
 }
 
@@ -194,6 +198,8 @@ json::Node JsonReader::ConstructJson(const svg::Document &document, int request_
 
 json::Node JsonReader::ConstructJson(const std::pair<double, std::optional<std::vector<RouteItems>>> &items, int request_id)
 {
+    std::cerr << "11111\n";
+
     using namespace std::string_literals;
     if (items.first == -1)
         return NotFoundResponse(request_id);
@@ -217,6 +223,7 @@ json::Node JsonReader::ConstructJson(const std::pair<double, std::optional<std::
             arr.push_back(addItem(std::get<UsingBus>(item)));
     }
 
+    std::cerr << "22222\n";
     return json::Builder{}
         .StartDict()
         .Key("request_id"s)

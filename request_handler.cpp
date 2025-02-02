@@ -114,22 +114,44 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
 
     auto route_info = router->BuildRoute(router_.GetIdByStop(from_stop),
                                          router_.GetIdByStop(to_stop));
+
+    if (!route_info)
+        return { -1., std::nullopt };
+
     if (route_info->edges.empty())
         return {-1., std::nullopt};
 
     const auto [stops_chain, weights] = router_.GetRouteVector(*route_info);
     int waiting_time = router_.GetBusWaitingTime();
 
+    for (auto &s : stops_chain)
+    {
+        std::cerr << " > " << s;
+        std::cerr << std::flush;
+    }
+    std::cerr << std::endl;
+    for (auto &w : weights)
+    {
+        std::cerr << " > " << w;
+         std::cerr << std::flush;
+    }
+    std::cerr << std::endl;
     std::vector<RouteItems> route_items;
     auto it = stops_chain.begin();
     while (true)
     {
+        std::cerr << __LINE__ << '\n';
+         std::cerr << std::flush;
         route_items.push_back(WaitingOnStop{*it, waiting_time});
+        std::cerr << __LINE__ << '\n';
+         std::cerr << std::flush;
         auto diff = it;
         std::string_view bus;
         try
         {
-            bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.end(), *GetBusesByStop(*it));
+            auto req = GetBusesByStop(*it);
+            if (!req) break;
+            bus = router_.FindMostUsedBusInStopsChain(it, stops_chain.end(), *req);
         }
         catch (const std::exception &e)
         {
@@ -137,15 +159,21 @@ std::pair<double, std::optional<std::vector<RouteItems>>> RequestHandler::GetRou
             break;
         }
         if (bus.empty())
+        {
+            std::cerr << "No buses found for stop " << '\n';
+             std::cerr << std::flush;
             break;
-            std::cout<<"11\n";
+        }
+        std::cerr << "11\n";
+         std::cerr << std::flush;
         int w_begin_diff = static_cast<int>(std::distance(stops_chain.begin(), diff));
         int w_end_diff = static_cast<int>(std::distance(stops_chain.begin(), it));
         double weight_of_chain = std::accumulate(weights.begin() + w_begin_diff, weights.begin() + w_end_diff, 0.);
         route_items.push_back(UsingBus{bus, w_end_diff - w_begin_diff, weight_of_chain});
         route_info->weight += waiting_time;
     }
-    std::cout<<"1\n";
+    std::cerr << "1\n";
+       std::cerr << std::flush;
     route_items.pop_back();
     return {route_info->weight, route_items};
 }
