@@ -25,13 +25,13 @@ void JsonReader::FillDataBase(const Node &node)
         if (data.at("type").AsString() == "Stop")
             FillStops(data, temp_distances);
     }
-    db_.AddDistances(std::move(temp_distances));
     for (const auto &arr : node.AsArray())
     {
         const auto &data = arr.AsMap();
         if (data.at("type").AsString() == "Bus")
             FillBuses(data);
     }
+    db_.AddDistances(std::move(temp_distances));
 }
 
 void JsonReader::GetRouteSettings(const Node &node)

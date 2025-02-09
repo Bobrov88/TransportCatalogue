@@ -40,17 +40,25 @@ void TransportCatalogue::AddDistances(std::unordered_map<std::string_view, std::
     {
         if (!bus->is_round_trip)
         {
+            std::cerr<<"Bus name: "<< bus->name<<std::endl;
             const auto &back_route_stop = bus->stops;
             for (auto it = back_route_stop.begin(); it != std::prev(back_route_stop.end()); ++it)
             {
                 size_t found_right = distances_.count(std::pair(stops_.at(*it), stops_.at(*std::next(it))));
                 size_t found_back = distances_.count(std::pair(stops_.at(*std::next(it)), stops_.at(*it)));
-                if (found_right == 0 && found_back > 0)
+                std::cerr << "Found " << found_right << " and " << found_back << "\n";
+                if (!found_right && found_back)
+                {
                     distances_.emplace(std::pair(stops_.at(*it), stops_.at(*std::next(it))),
                                        distances_.at(std::pair(stops_.at(*std::next(it)), stops_.at(*it))));
-                if (found_right > 0 && found_back == 0)
+                    std::cerr << "Adding " << stops_.at(*it) << " --> " << stops_.at(*std::next(it)) << "\n";
+                }
+                if (found_right && !found_back)
+                {
                     distances_.emplace(std::pair(stops_.at(*std::next(it)), stops_.at(*it)),
                                        distances_.at(std::pair(stops_.at(*it), stops_.at(*std::next(it)))));
+                    std::cerr << "Adding " << stops_.at(*std::next(it)) << " --> " << stops_.at(*it) << "\n";
+                }
             }
         }
     }
