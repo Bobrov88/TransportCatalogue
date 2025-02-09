@@ -211,6 +211,9 @@ json::Node JsonReader::ConstructJson(const std::pair<double, std::optional<std::
             .Value(request_id)
             .Key("total_time"s)
             .Value(0)
+            .Key("items")
+            .StartArray()
+            .EndArray()
             .EndDict()
             .Build();
 

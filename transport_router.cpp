@@ -44,11 +44,9 @@ void TransportRouter::InitializeGraph(routestats stats)
     graph::DirectedWeightedGraph<double> dw_graph(db_.GetStops().size());
 
     for (const auto &[stops, distance] : db_.GetDistances())
-    {
         dw_graph.AddEdge({GetIdByStop(stops.first->name),
                           GetIdByStop(stops.second->name),
                           (distance * 60) / (1000 * stats_.bus_velocity)});
-    }
 
     dw_graph_ = std::move(dw_graph);
     router_ = std::make_unique<graph::Router<double>>(dw_graph_);

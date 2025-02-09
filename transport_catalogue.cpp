@@ -35,6 +35,25 @@ void TransportCatalogue::AddDistances(std::unordered_map<std::string_view, std::
             distances_.emplace(std::pair(stops_.at(key1), stops_.at(key2)), value2);
         }
     }
+
+    for (const auto &[_, bus] : buses_)
+    {
+        if (!bus->is_round_trip)
+        {
+            const auto &back_route_stop = bus->stops;
+            for (auto it = back_route_stop.begin(); it != std::prev(back_route_stop.end()); ++it)
+            {
+                size_t found_right = distances_.count(std::pair(stops_.at(*it), stops_.at(*std::next(it))));
+                size_t found_back = distances_.count(std::pair(stops_.at(*std::next(it)), stops_.at(*it)));
+                if (found_right == 0 && found_back > 0)
+                    distances_.emplace(std::pair(stops_.at(*it), stops_.at(*std::next(it))),
+                                       distances_.at(std::pair(stops_.at(*std::next(it)), stops_.at(*it))));
+                if (found_right > 0 && found_back == 0)
+                    distances_.emplace(std::pair(stops_.at(*std::next(it)), stops_.at(*it)),
+                                       distances_.at(std::pair(stops_.at(*it), stops_.at(*std::next(it)))));
+            }
+        }
+    }
 }
 
 const Bus *TransportCatalogue::GetBus(std::string_view bus) const
